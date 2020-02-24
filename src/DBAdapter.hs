@@ -1,9 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
-
-
 module DBAdapter where
+
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
 import Control.Concurrent

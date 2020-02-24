@@ -1,12 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
-import Database.SQLite.Simple
-import Control.Monad.IO.Class
-import Control.Concurrent
 import Network.Wai.Handler.Warp
 import Servant
-import Debug.Trace
 
 import Handlers
 import DBAdapter

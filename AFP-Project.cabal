@@ -18,6 +18,7 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md
 
 executable AFP-Project
+  ghc-options:         -Wall
   main-is:             Main.hs
   build-depends:       base >=4.12 && <4.14
                      , servant-server

@@ -2,15 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 module Handlers where
+
 import Database.SQLite.Simple
-import Control.Monad.IO.Class
-import Control.Concurrent
-import Network.Wai.Handler.Warp
 import Servant
 import Debug.Trace
 
 import DBAdapter
-
 
 postMessage :: String ->  FilePath ->  Handler NoContent
 postMessage msg dbfile = trace "POST" $ do
