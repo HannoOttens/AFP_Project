@@ -1,6 +1,5 @@
 module Handlers where
 
-import Database.SQLite.Simple
 import Servant
 import Debug.Trace
 
@@ -12,4 +11,4 @@ postMessage msg dbfile = trace "POST" $ do
     return NoContent
 
 getMessages :: FilePath -> Handler [String]
-getMessages dbfile = trace "GET" $ fmap (map fromOnly) (dbExec dbfile dbGetMessages)
+getMessages dbfile = trace "GET" $ dbExec dbfile dbGetMessages

@@ -15,5 +15,6 @@ dbExec dbfile f = liftIO $ withConnection dbfile f
 dbAddMessage :: String -> Connection -> IO ()
 dbAddMessage msg conn = execute conn "INSERT INTO messages VALUES (?)" (Only msg)
 
-dbGetMessages :: FromRow r => Connection -> IO [r]
-dbGetMessages conn    = query_ conn  "SELECT msg FROM messages"
+dbGetMessages :: Connection -> IO [String]
+dbGetMessages conn  = let result = query_ conn  "SELECT msg FROM messages"
+                      in fmap (map fromOnly) result
