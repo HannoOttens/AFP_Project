@@ -21,4 +21,4 @@ dbExec dbfile f = liftIO $ withConnection dbfile f
 
 
 dbAddMessage msg conn = execute conn "INSERT INTO messages VALUES (?)" (Only msg)
-dbGetMessages conn = query_ conn "SELECT msg FROM messages"
+dbGetMessages conn    = query_ conn  "SELECT msg FROM messages"
