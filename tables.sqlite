@@ -1,0 +1,33 @@
+Create Table If Not Exists Users (
+	UserID Integer Not Null,
+	Username Text Not Null,
+	Password Text Not Null,
+	Primary Key (UserID)
+);
+
+Create Table If Not Exists Websites (
+	WebsiteID Integer Not Null,
+	URL Text Not Null,
+	Data Blob,
+	LastUpdate Integer,
+	Primary Key (WebsiteID)
+);
+
+Create Table If Not Exists Subscriptions (
+	User Integer Not Null,
+	Website Integer Not Null,
+	Keyword Text,
+	Primary Key (User, Website),
+	Foreign Key (User) References Users (UserID),
+    Foreign Key (Website) References Websites (WebsiteID) 
+);
+
+Create Table If Not Exists Notifications (
+	User Integer Not Null,
+	Website Integer Not Null,
+	Message Text,
+	Timestamp Integer Not Null,
+	Primary Key (User, Website),
+	Foreign Key (User) References Users (UserID),
+    Foreign Key (Website) References Websites (WebsiteID)
+);
