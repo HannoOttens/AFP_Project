@@ -24,6 +24,7 @@ executable AFP-Project
                      , aeson
                      , warp
                      , sqlite-simple
+                     , scalpel
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , Handlers
