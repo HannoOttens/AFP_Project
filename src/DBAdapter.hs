@@ -1,14 +1,8 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators #-}
 module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Concurrent
-import Network.Wai.Handler.Warp
 import Servant
-import Debug.Trace
 
 initDB :: FilePath -> IO ()
 initDB dbfile = withConnection dbfile $ \conn ->
@@ -18,6 +12,8 @@ initDB dbfile = withConnection dbfile $ \conn ->
 dbExec :: FilePath -> (Connection -> IO a) -> Handler a
 dbExec dbfile f = liftIO $ withConnection dbfile f
 
-
+dbAddMessage :: String -> Connection -> IO ()
 dbAddMessage msg conn = execute conn "INSERT INTO messages VALUES (?)" (Only msg)
+
+dbGetMessages :: FromRow r => Connection -> IO [r]
 dbGetMessages conn    = query_ conn  "SELECT msg FROM messages"

@@ -19,6 +19,9 @@ extra-source-files:  CHANGELOG.md
 
 executable AFP-Project
   ghc-options:         -Wall
+  default-extensions:  DataKinds
+                     , TypeOperators
+                     , OverloadedStrings
   main-is:             Main.hs
   build-depends:       base >=4.12 && <4.14
                      , servant-server
