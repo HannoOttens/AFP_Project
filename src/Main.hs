@@ -1,24 +1,50 @@
 {-# LANGUAGE DataKinds #-}
---{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
---{-# LANGUAGE KindSignatures #-}
-
-import Data.Aeson
-import GHC.Generics
-import GHC.TypeLits
+import Control.Concurrent
+import Control.Exception (bracket)
+import Control.Monad.IO.Class
+import Database.SQLite.Simple
 import Network.Wai.Handler.Warp
 import Servant
-import Servant.Server.StaticFiles
+import Debug.Trace
 
-type API = StaticFile
+type Message = String
 
-type StaticFile = Raw
-
-staticServer :: Server StaticFile
-staticServer = serveDirectoryWebApp "var/www"
+type API = ReqBody '[PlainText] Message :> Post '[JSON] NoContent
+      :<|> Get '[JSON] [Message]
 
 api :: Proxy API
 api = Proxy
 
+initDB :: FilePath -> IO ()
+initDB dbfile = withConnection dbfile $ \conn ->
+  execute_ conn
+    "CREATE TABLE IF NOT EXISTS messages (msg text not null)"
+
+server :: FilePath -> Server API
+server dbfile = postMessage :<|> getMessages
+
+  where 
+        postMessage :: Message -> Handler NoContent
+        postMessage msg = trace "POST" $ do
+          liftIO . withConnection dbfile $ \conn ->
+            execute conn
+                    "INSERT INTO messages VALUES ('?')"
+                    (Only msg)
+          return NoContent
+
+        getMessages :: Handler [Message]
+        getMessages = trace "GET" $ fmap (map fromOnly) . liftIO $
+         withConnection dbfile $ \conn ->
+            query_ conn "SELECT msg FROM messages"
+
+runApp :: FilePath -> IO ()
+runApp dbfile = run 8080 (serve api $ server dbfile)
+
+
 main :: IO ()
-main = run 8080 . serve api $ staticServer
+main = do
+  let dbfile = "db"
+  initDB dbfile
+  runApp dbfile
