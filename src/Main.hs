@@ -4,7 +4,6 @@
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
 import Control.Concurrent
-import Control.Monad.IO.Class
 import Network.Wai.Handler.Warp
 import Servant
 import Debug.Trace
@@ -27,6 +26,7 @@ server dbfile = postMessage :<|> getMessages
 
         getMessages :: Handler [Message]
         getMessages = trace "GET" $ fmap (map fromOnly) (dbExec dbfile dbGetMessages)
+
 
 runApp :: FilePath -> IO ()
 runApp dbfile = run 8080 (serve api $ server dbfile)
