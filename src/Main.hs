@@ -2,12 +2,12 @@ import Network.Wai.Handler.Warp
 import Servant
 import Control.Monad.Reader
 
-import Handlers
 import DBAdapter
+import Handlers.Account
 
-type API = ReqBody '[PlainText] String :> Post '[JSON] NoContent
-      :<|> Get '[JSON] [String]
-
+type API = LoginAPI
+      :<|> Raw
+        
 config :: Config
 config = Config {
       dbFile = "db",
@@ -15,7 +15,8 @@ config = Config {
 }
 
 server :: ServerT API (AppM Handler)
-server = postMessage :<|> getMessages
+server = accountServer
+    :<|> serveDirectoryWebApp "www" 
 
 api :: Proxy API
 api = Proxy

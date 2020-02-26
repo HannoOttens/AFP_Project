@@ -5,8 +5,8 @@ import           Web.FormUrlEncoded          (FromForm)
 
 -- | Used on the register page to register a user
 data RegisterForm = RegisterForm
- { email   :: String
- , password :: String
+ { username  :: String
+ , password  :: String
  , rpassword :: String
  } deriving (Eq, Show, Generic)
 

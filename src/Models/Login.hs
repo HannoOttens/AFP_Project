@@ -5,7 +5,7 @@ import Web.FormUrlEncoded (FromForm)
 
 -- | Used for logging in
 data LoginForm = LoginForm
- { email   :: String
+ { username :: String
  , password :: String
  } deriving (Eq, Show, Generic)
 
