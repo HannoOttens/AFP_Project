@@ -3,16 +3,11 @@ import Servant
 import Control.Monad.Reader
 
 import DBAdapter
-import Models.Login
-import Models.Register
-
 import Handlers.Account
 
 type API = LoginAPI
-
-type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[FormUrlEncoded] NoContent
-           :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> Post '[FormUrlEncoded] NoContent
-
+      :<|> Raw
+        
 config :: Config
 config = Config {
       dbFile = "db",
@@ -20,7 +15,8 @@ config = Config {
 }
 
 server :: ServerT API (AppM Handler)
-server = login :<|> register 
+server = accountServer
+    :<|> serveDirectoryWebApp "www" 
 
 api :: Proxy API
 api = Proxy
