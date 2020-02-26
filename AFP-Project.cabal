@@ -29,6 +29,7 @@ executable AFP-Project
                      , warp
                      , sqlite-simple
                      , scalpel
+                     , mtl
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , Handlers

@@ -2,13 +2,16 @@ module Handlers where
 
 import Servant
 import Debug.Trace
+import Control.Monad.Reader
 
 import DBAdapter
 
-postMessage :: String ->  FilePath ->  Handler NoContent
-postMessage msg dbfile = trace "POST" $ do
-    dbExec dbfile $ dbAddMessage msg
-    return NoContent
+postMessage :: DB (String ->  Handler NoContent)
+postMessage = trace "POST" $ do
+    dbfile <- ask
+    return (\msg -> do 
+        _ <- runReader (dbExec $ dbAddMessage msg) dbfile
+        return NoContent)
 
-getMessages :: FilePath -> Handler [String]
-getMessages dbfile = trace "GET" $ dbExec dbfile dbGetMessages
+getMessages :: DB (Handler [String])
+getMessages = trace "GET" $ dbExec dbGetMessages
