@@ -2,22 +2,29 @@ module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Reader
+import Control.Monad.Trans.Reader(ReaderT, ask, asks)
 import Servant
 
-type DB a = Reader String a
+--type DB a = Reader String a
 
-initDB :: DB (IO ())
-initDB = do 
-  dbfile <- ask
-  return $ withConnection dbfile $ \conn ->
+data Config = Config
+  { 
+    dbFile :: String
+  }
+
+type AppM a = ReaderT Config a
+
+initDB :: AppM IO ()
+initDB = do
+  file <- asks dbFile
+  liftIO $ withConnection file (\conn ->
     execute_ conn
-      "CREATE TABLE IF NOT EXISTS messages (msg text not null)"
+      "CREATE TABLE IF NOT EXISTS messages (msg text not null)")
 
-dbExec :: (Connection -> IO a) -> DB (Handler a)
+dbExec :: (Connection -> IO a) -> AppM Handler a
 dbExec f = do 
-  dbfile <- ask
-  return $ liftIO $ withConnection dbfile f
+  Config {dbFile = file} <- ask
+  liftIO $ withConnection file f
 
 dbAddMessage :: String -> Connection -> IO ()
 dbAddMessage msg conn = execute conn "INSERT INTO messages VALUES (?)" (Only msg)

@@ -30,6 +30,7 @@ executable AFP-Project
                      , sqlite-simple
                      , scalpel
                      , mtl
+                     , transformers
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , Handlers
