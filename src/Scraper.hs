@@ -28,8 +28,6 @@ getTitlesFromAFPSite = scrapeURL "http://www.cs.uu.nl/docs/vakken/afp/schedule.h
                             elems <- texts "td"
                             return $ elems !! 2
 
-scrapeFullSite :: [URL] -> IO (Maybe [String])
-
 scrapeSpecificSite :: URL -> IO (Maybe String)
 scrapeSpecificSite url = scrapeURL url (html "html")
 
