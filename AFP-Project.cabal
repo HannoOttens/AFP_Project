@@ -34,11 +34,14 @@ executable AFP-Project
                      , mtl
                      , transformers
                      , http-api-data
+                     , time
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , Handlers
                      , Models.Login
                      , Models.Register
+                     , Models.Website
+                     , Models.User
   default-language:    Haskell2010
 
 test-suite test

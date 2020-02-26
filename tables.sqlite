@@ -1,6 +1,6 @@
 Create Table If Not Exists Users (
 	UserID Integer Not Null,
-	Username Text Not Null,
+	Username Text Not Null Unique,
 	Password Text Not Null,
 	Primary Key (UserID)
 );
