@@ -8,20 +8,22 @@ import Debug.Trace
 import DBAdapter
 import Models.Register as RM
 import Models.Login as LM
+import PostRedirect
 
 
-type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[FormUrlEncoded] NoContent
-           :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> Post '[FormUrlEncoded] NoContent
+type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> PostRedirect 301 String
+           :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> PostRedirect 301 String
 
 
 accountServer :: ServerT LoginAPI (AppM Handler)
 accountServer = login 
            :<|> register 
 
-register :: RM.RegisterForm -> AppM Handler NoContent
-register form = trace "REGISTER" $ do
-    return NoContent
 
-login :: LM.LoginForm -> AppM Handler NoContent
+register :: RegisterForm -> AppM Handler PostRedirectHandler
+register form = trace "REGISTER" $ do
+    return $ redirect "login.html"
+
+login :: LoginForm -> AppM Handler PostRedirectHandler
 login form = trace (LM.username form) $ do
-    return NoContent
+    return $ redirect "account.html"

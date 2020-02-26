@@ -36,6 +36,7 @@ executable AFP-Project
                      , http-api-data
   hs-source-dirs:      src
   other-modules:       DBAdapter
+                     , PostRedirect
                      , Models.Login
                      , Models.Register
                      , Handlers.Account
