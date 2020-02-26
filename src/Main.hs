@@ -2,14 +2,19 @@ import Network.Wai.Handler.Warp
 import Servant
 import Control.Monad.Reader
 
-import Handlers
 import DBAdapter
+import Models.Login
+import Models.Register
 
-type API = ReqBody '[PlainText] String :> Post '[JSON] NoContent
-      :<|> Get '[JSON] [String]
+import Handlers.Account
+
+type API = LoginAPI
+
+type LoginAPI = ReqBody '[FormUrlEncoded] LoginForm :> Post '[JSON] NoContent
+           :<|> ReqBody '[FormUrlEncoded] RegisterForm :> Post '[JSON] NoContent
 
 server :: ServerT API (AppM Handler)
-server = postMessage :<|> getMessages
+server = login :<|> register 
 
 api :: Proxy API
 api = Proxy
