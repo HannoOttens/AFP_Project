@@ -5,6 +5,11 @@ Create Table If Not Exists Users (
 	Primary Key (UserID)
 );
 
+Create Table If Not Exists NotificationTokens (
+	UserID Integer Not Null,
+	Token Text Not Null,
+);
+
 Create Table If Not Exists Websites (
 	WebsiteID Integer Not Null,
 	URL Text Not Null,
