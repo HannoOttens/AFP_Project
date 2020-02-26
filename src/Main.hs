@@ -8,6 +8,12 @@ import DBAdapter
 type API = ReqBody '[PlainText] String :> Post '[JSON] NoContent
       :<|> Get '[JSON] [String]
 
+config :: Config
+config = Config {
+      dbFile = "db",
+      initFile = "tables.sqlite"
+}
+
 server :: ServerT API (AppM Handler)
 server = postMessage :<|> getMessages
 
@@ -15,10 +21,9 @@ api :: Proxy API
 api = Proxy
 
 runApp :: Config -> IO ()
-runApp conf = run 8080 (serve api $ hoistServer api (flip runReaderT conf) server)
+runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
 
 main :: IO ()
 main = do
-  let config = Config {dbFile = "db"}
   runReaderT initDB config
   runApp config

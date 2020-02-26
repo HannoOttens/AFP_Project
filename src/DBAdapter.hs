@@ -1,29 +1,34 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader(ReaderT, ask, asks)
+import Control.Monad.Trans.Reader(ReaderT, asks, ask)
 import Servant
+import Data.String
 
---type DB a = Reader String a
-
+-- | Configuration 
 data Config = Config
   { 
-    dbFile :: String
+    dbFile   :: String, -- | Path to the sqlite database file
+    initFile :: String  -- | Path to the file containing create table statement
   }
 
 type AppM a = ReaderT Config a
 
+-- | Initialize database with tables if do not already exist
 initDB :: AppM IO ()
 initDB = do
-  file <- asks dbFile
-  liftIO $ withConnection file (\conn ->
-    execute_ conn
-      "CREATE TABLE IF NOT EXISTS messages (msg text not null)")
+  config <- ask
+  liftIO $ do 
+    initQuery <- readFile (initFile config)
+    withConnection (dbFile config) (`execute_` fromString initQuery)
 
+-- | Execute an action on the database
 dbExec :: (Connection -> IO a) -> AppM Handler a
 dbExec f = do 
-  Config {dbFile = file} <- ask
+  file <- asks dbFile
   liftIO $ withConnection file f
 
 dbAddMessage :: String -> Connection -> IO ()

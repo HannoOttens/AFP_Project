@@ -1,12 +1,13 @@
 module Models.Login where
 
-import GHC.Generics as T
-import Servant 
+import GHC.Generics
 import Web.FormUrlEncoded (FromForm)
 
+-- | Used for logging in
 data LoginForm = LoginForm
- { email   :: !T.Text
- , password :: !T.Text
+ { email   :: String
+ , password :: String
  } deriving (Eq, Show, Generic)
 
+-- | Instance to convert formdata to the `LoginForm` model
 instance FromForm LoginForm
