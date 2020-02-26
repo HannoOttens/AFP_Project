@@ -30,5 +30,5 @@ dbAddMessage :: String -> Connection -> IO ()
 dbAddMessage msg conn = execute conn "INSERT INTO messages VALUES (?)" (Only msg)
 
 dbGetMessages :: Connection -> IO [String]
-dbGetMessages conn  = let result = query_ conn  "SELECT msg FROM messages"
-                      in fmap (map fromOnly) result
+dbGetMessages conn = let result = query_ conn "SELECT msg FROM messages"
+                     in fmap (map fromOnly) result
