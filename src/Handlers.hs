@@ -6,12 +6,11 @@ import Control.Monad.Reader
 
 import DBAdapter
 
-postMessage :: DB (String ->  Handler NoContent)
-postMessage = trace "POST" $ do
-    dbfile <- ask
-    return (\msg -> do 
-        _ <- runReader (dbExec $ dbAddMessage msg) dbfile
-        return NoContent)
+postMessage :: String -> AppM Handler NoContent
+postMessage msg = trace "POST" $ do
+    Config {dbFile = f} <- ask
+    dbExec $ dbAddMessage msg
+    return NoContent
 
-getMessages :: DB (Handler [String])
+getMessages :: AppM Handler [String]
 getMessages = trace "GET" $ dbExec dbGetMessages

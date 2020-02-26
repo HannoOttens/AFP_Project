@@ -5,29 +5,40 @@ Create Table If Not Exists Users (
 	Primary Key (UserID)
 );
 
+-- Tokens that user defined
+Create Table If Not Exists NotificationTokens (
+	UserID Integer Not Null,
+	Token Text Not Null,
+	Foreign Key (UserID) References Users (UserID),
+
+);
+
+-- All targeted URLs
 Create Table If Not Exists Websites (
 	WebsiteID Integer Not Null,
 	URL Text Not Null,
-	Data Blob,
 	LastUpdate Integer,
+	Hash Text,
 	Primary Key (WebsiteID)
 );
 
-Create Table If Not Exists Subscriptions (
-	User Integer Not Null,
-	Website Integer Not Null,
-	Keyword Text,
+-- User defined targets
+Create Table If Not Exists Targets (
+	UserID Integer Not Null,
+	WebsiteID Integer Not Null,
+	Selector Text,
+	ShareURL Text, -- For a possible sharing feature
 	Primary Key (User, Website),
-	Foreign Key (User) References Users (UserID),
-    Foreign Key (Website) References Websites (WebsiteID) 
+	Foreign Key (UserID) References Users (UserID),
+    Foreign Key (WebsiteID) References Websites (WebsiteID) 
 );
 
 Create Table If Not Exists Notifications (
-	User Integer Not Null,
-	Website Integer Not Null,
+	UserID Integer Not Null,
+	WebsiteID Integer Not Null,
 	Message Text,
 	Timestamp Integer Not Null,
 	Primary Key (User, Website),
-	Foreign Key (User) References Users (UserID),
-    Foreign Key (Website) References Websites (WebsiteID)
+	Foreign Key (UserID) References Users (UserID),
+    Foreign Key (WebsiteID) References Websites (WebsiteID)
 );
