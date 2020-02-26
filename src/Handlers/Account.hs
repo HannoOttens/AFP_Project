@@ -13,5 +13,5 @@ register form = trace "REGISTER" $ do
     return NoContent
 
 login :: LM.LoginForm -> AppM Handler NoContent
-login form = trace "LOGIN" $ do
+login form = trace (LM.username form) $ do
     return NoContent

@@ -10,8 +10,8 @@ import Handlers.Account
 
 type API = LoginAPI
 
-type LoginAPI = ReqBody '[FormUrlEncoded] LoginForm :> Post '[JSON] NoContent
-           :<|> ReqBody '[FormUrlEncoded] RegisterForm :> Post '[JSON] NoContent
+type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[FormUrlEncoded] NoContent
+           :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> Post '[FormUrlEncoded] NoContent
 
 config :: Config
 config = Config {
