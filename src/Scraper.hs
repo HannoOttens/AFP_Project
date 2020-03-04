@@ -2,42 +2,39 @@ module Scraper (scrapeSite, scrapePage, scrapeElements, scrapeElement, scrapeAtt
 
 import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
 import Text.HTML.TagSoup
-import Data.Hashable
 
 type URL        = String
 type Element    = String
 type Nesting    = Int
-type HashedTags = Int
 
 -- Return site as string
 getSite :: URL -> IO String
 getSite url = getResponseBody =<< simpleHTTP (getRequest url)
 
 -- Return all tags from all pages on a site
-scrapeSite :: [URL] -> IO [HashedTags]
+scrapeSite :: [URL] -> IO [String]
 scrapeSite = mapM scrapePage
 
 -- Return all tags from a page
-scrapePage :: URL -> IO HashedTags
-scrapePage url = do site <- getSite url
-                    return $ hash site
+scrapePage :: URL -> IO String
+scrapePage = getSite
 
 -- Return all tags within all elements from a url
-scrapeElements :: [Element] -> URL -> IO [HashedTags]
+scrapeElements :: [Element] -> URL -> IO [String]
 scrapeElements es url = mapM (`scrapeElement` url) es
 
 -- Return all tags within an element from a url
-scrapeElement :: Element -> URL -> IO HashedTags
+scrapeElement :: Element -> URL -> IO String
 scrapeElement = scrapeAttribute ("", "")
 
 -- Return all tags within an element with given attributes from a url
-scrapeAttributes :: [Attribute String] -> Element -> URL -> IO [HashedTags]
+scrapeAttributes :: [Attribute String] -> Element -> URL -> IO [String]
 scrapeAttributes as e url = mapM (\a -> scrapeAttribute a e url) as
 
 -- Return all tags within an element with a given attribute from a url
-scrapeAttribute :: Attribute String -> Element -> URL -> IO HashedTags
+scrapeAttribute :: Attribute String -> Element -> URL -> IO String
 scrapeAttribute a e url = do tags <- parseTags <$> getSite url
-                             return $ hash $ renderTags $ filterTags a e 0 tags
+                             return $ renderTags $ filterTags a e 0 tags
 
 -- Filter tags such that they match the given element and/or attribute, counter to find nested elements with the same tag
 filterTags :: Attribute String -> Element -> Nesting -> [Tag String] -> [Tag String]

@@ -5,7 +5,7 @@ module Handlers.Account (
 import Servant
 import Debug.Trace
 
-import DBAdapter
+import DBAdapter as DB
 import Models.Register as RM
 import Models.Login as LM
 import Models.User as UM
@@ -24,7 +24,7 @@ register :: RegisterForm -> AppM Handler PostRedirectHandler
 register form = trace "account/register" $ do
     if RM.password form == RM.rpassword form
     then do
-        success <- dbExec $ dbAddUser UM.User { UM.id       = 0,
+        success <- liftDbAction $ DB.addUser UM.User { UM.id       = 0,
                                                 UM.username = RM.username form, 
                                                 UM.password = RM.password form }
         if success
@@ -36,7 +36,7 @@ register form = trace "account/register" $ do
 -- | Log in a user
 login :: LoginForm -> AppM Handler PostRedirectHandler
 login form = trace "account/login" $ do
-    user <- dbExec $ dbGetUser (LM.username form)
+    user <- liftDbAction $ DB.getUser (LM.username form)
     case user of
         Nothing -> redirect "login.html"
         Just u  -> if UM.password u == LM.password form
