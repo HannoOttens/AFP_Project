@@ -39,6 +39,7 @@ executable AFP-Project
                      , text
   hs-source-dirs:      src
   other-modules:       DBAdapter
+                     , Config
                      , PostRedirect
                      , Models.Login
                      , Models.Register

@@ -32,7 +32,7 @@ pollWebsites = putStrLn "HeY! A MaN Has FaLLeN iN tHe WaTER in LEgo CiTY!!!"
 
 main :: IO ()
 main = do
-  pids <- execSchedule $ do
+  _ <- execSchedule $ do
         addJob pollWebsites $ pollSchedule config 
   runReaderT initDB config
   runApp config
