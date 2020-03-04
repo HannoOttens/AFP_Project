@@ -2,8 +2,8 @@ module Models.Website where
 
 import Data.Time
 
-type URL = String
-type Hash = String
+type URL  = String
+type Hash = Int
 
 -- | Specifies a website
 data Website = Website {
