@@ -30,15 +30,18 @@ executable AFP-Project
                      , aeson
                      , warp
                      , sqlite-simple
-                     , scalpel
+                     , hashable
                      , mtl
                      , transformers
                      , http-api-data
                      , time
                      , transformers-base
                      , split
+                     , cron
+                     , text
   hs-source-dirs:      src
   other-modules:       DBAdapter
+                     , Config
                      , PostRedirect
                      , Models.Login
                      , Models.Register
