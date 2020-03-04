@@ -35,8 +35,11 @@ executable AFP-Project
                      , transformers
                      , http-api-data
                      , time
+                     , cron
+                     , text
   hs-source-dirs:      src
   other-modules:       DBAdapter
+                     , Config
                      , PostRedirect
                      , Models.Login
                      , Models.Register
