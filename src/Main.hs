@@ -5,7 +5,7 @@ import Control.Monad.Reader
 import System.Cron.Schedule
 import Data.Hashable
 
-import DBAdapter
+import DBAdapter as DB
 import Handlers.Account
 import Config
 import Scraper
@@ -32,8 +32,8 @@ runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
 
 pollWebsites :: IO ()
 pollWebsites = do h <- hash <$> scrapePage "http://www.cs.uu.nl/docs/vakken/afp/schedule.html"
-                  b <- runReaderT (dbExec $ dbCheckWebsiteHash 0 h) config
-                  when b $ do _ <- runReaderT (dbExec $ dbUpdateWebsiteHash 0 h) config
+                  b <- runReaderT (DB.exec $ DB.checkWebsiteHash 0 h) config
+                  when b $ do _ <- runReaderT (DB.exec $ DB.updateWebsiteHash 0 h) config
                               -- notify
                               return ()
 
