@@ -3,9 +3,9 @@ module Scraper (scrapeSite, scrapePage, scrapeElements, scrapeElement, scrapeAtt
 import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
 import Text.HTML.TagSoup
 
-type URL        = String
-type Element    = String
-type Nesting    = Int
+type URL     = String
+type Element = String
+type Nesting = Int
 
 -- Return site as string
 getSite :: URL -> IO String

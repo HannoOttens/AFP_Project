@@ -1,4 +1,5 @@
 import Network.Wai.Handler.Warp
+import Database.SQLite.Simple
 import Servant
 import Control.Monad
 import Control.Monad.Reader
@@ -32,17 +33,19 @@ runApp :: Config -> IO ()
 runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
 
 pollWebsites :: IO ()
-pollWebsites = do ws <- runReaderT (DB.exec DB.getWebsites) config
-                  _ <- mapM pollWebsite ws
-                  return ()
+pollWebsites = do ws <- execDB DB.getWebsites
+                  mapM_ pollWebsite ws
 
 pollWebsite :: Website -> IO ()
 pollWebsite ws = do h <- H.hash <$> scrapePage (url ws)
                     let wid = idWebsite ws
-                    b <- runReaderT (DB.exec $ DB.checkWebsiteHash wid h) config
-                    when b $ do _ <- runReaderT (DB.exec $ DB.updateWebsiteHash wid h) config
+                    b <- execDB $ DB.checkWebsiteHash wid h
+                    when b $ do _ <- execDB $ DB.updateWebsiteHash wid h
                                 -- notify
                                 return ()
+
+execDB :: (Connection -> IO a) -> IO a
+execDB f = runReaderT (DB.exec f) config
 
 main :: IO ()
 main = do

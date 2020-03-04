@@ -10,6 +10,10 @@ body {
     background-image: linear-gradient(to bottom right, rgb(0, 150, 200), rgb(0, 30, 50));
 }
 
+h2 {
+    padding-top: 15px;
+}
+
 input {
     width: 100%;
     padding: 10px;
@@ -29,6 +33,46 @@ button {
 button.flat {
     background-color: transparent;
     color: black;
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-collapse: collapse;
+}
+
+tbody
+{
+    border-spacing: 0;
+    border: none;
+}
+
+tr:not(:first-child) {
+    border-top: 1px solid #CCC;
+}
+
+tr:not(:first-child):hover {
+    background-color: #EEE;
+}
+
+th {
+    text-align: start;
+    padding: 10px;
+    user-select: none;
+}
+
+td {
+    padding: 10px;
+}
+
+.fa {
+    width: 24px;
+    height: 24px;
+}
+
+.align-right {
+    text-align: right;
 }
 
 .pull-right {
@@ -56,4 +100,19 @@ button.flat {
     grid-area: login;
     background-color: white;
     box-shadow: 1px 1px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.content {
+    margin: 5% 15%;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: white;
+}
+
+.blue {
+    fill: blue;
+}
+
+.red {
+    fill:red;
 }
