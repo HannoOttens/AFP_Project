@@ -1,4 +1,4 @@
-module Scraper (scrapeSite, scrapePage, scrapeElements, scrapeElement, scrapeAttribute) where
+module Scraper (scrapeSite, scrapePage, scrapeElements, scrapeElement, scrapeAttributes, scrapeAttribute) where
 
 import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
 import Text.HTML.TagSoup
@@ -30,10 +30,14 @@ scrapeElements es url = mapM (`scrapeElement` url) es
 scrapeElement :: Element -> URL -> IO HashedTags
 scrapeElement = scrapeAttribute ("", "")
 
+-- Return all tags within an element with given attributes from a url
+scrapeAttributes :: [Attribute String] -> Element -> URL -> IO [HashedTags]
+scrapeAttributes as e url = mapM (\a -> scrapeAttribute a e url) as
+
 -- Return all tags within an element with a given attribute from a url
 scrapeAttribute :: Attribute String -> Element -> URL -> IO HashedTags
-scrapeAttribute e a url = do tags <- parseTags <$> getSite url
-                             return $ hash $ renderTags $ filterTags e a 0 tags
+scrapeAttribute a e url = do tags <- parseTags <$> getSite url
+                             return $ hash $ renderTags $ filterTags a e 0 tags
 
 -- Filter tags such that they match the given element and/or attribute, counter to find nested elements with the same tag
 filterTags :: Attribute String -> Element -> Nesting -> [Tag String] -> [Tag String]
