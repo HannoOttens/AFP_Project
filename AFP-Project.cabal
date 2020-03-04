@@ -49,6 +49,7 @@ executable AFP-Project
                      , Models.Register
                      , Models.Website
                      , Models.User
+                     , Models.Target
                      , Handlers.Account
                      , Scraper
   default-language:    Haskell2010
