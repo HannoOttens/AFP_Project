@@ -2,10 +2,11 @@ module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader(ReaderT, asks, ask)
+import Control.Monad.Trans.Reader
 import Servant
 import Data.String
 import Data.Maybe(listToMaybe, isJust)
+import Data.List.Split
 
 import Models.Website
 import Models.User
@@ -25,10 +26,16 @@ initDB = do
   config <- ask
   liftIO $ do 
     initQuery <- readFile (initFile config)
-    withConnection (dbFile config) (`execute_` fromString initQuery)
+    withConnection (dbFile config) (`execute_` composeQuery initQuery)
+
+composeQuery :: String -> Query
+composeQuery = foldMap fromString . splitOn ";" 
+
+liftDbAction :: (Connection -> IO a) -> AppM Handler a
+liftDbAction = mapReaderT liftIO . dbExec
 
 -- | Execute an action on the database
-dbExec :: (Connection -> IO a) -> AppM Handler a
+dbExec :: (Connection -> IO a) -> AppM IO a
 dbExec f = do 
   file <- asks dbFile
   liftIO $ withConnection file f
@@ -44,6 +51,20 @@ dbGetMessages conn = let result = query_ conn "SELECT msg FROM messages"
 dbAddWebsite :: Website -> Connection -> IO ()
 dbAddWebsite website conn = execute conn insertWebsite (url website, hash website)
   where insertWebsite = "INSERT INTO Websites (URL, LastUpdate, Hash) VALUES (?, NOW(), ?)"
+
+-- | Check if website hash has changed, returns True if it has changed or website is not found
+dbCheckWebsiteHash :: Int -> Int -> Connection -> IO Bool
+dbCheckWebsiteHash websiteID newHash conn = do 
+    result <- query conn checkHash (websiteID, newHash) :: IO [Only Int]
+    let (Only count) = head result
+    return $ count == 0
+  where checkHash = "SELECT COUNT() FROM Websites WHERE WebsiteID = ? AND Hash = ?"
+
+dbUpdateWebsiteHash :: Int -> Int -> Connection -> IO Bool
+dbUpdateWebsiteHash websiteID newHash conn = do
+    execute conn updateHash (newHash, websiteID)
+    (== 1) <$> changes conn
+  where updateHash = "UPDATE Websites SET Hash = ?, LastUpdate = NOW() WHERE WebsiteID = ?"
 
 
 -- | Add a new user to the database, if username is not already in use.
@@ -67,6 +88,5 @@ dbGetUser name conn = do
 
 -- | Add notification token for user to database
 dbAddToken :: User -> String -> Connection -> IO ()
-dbAddToken user token conn = do
-    execute conn insertToken (idUser user, token)
+dbAddToken user token conn = execute conn insertToken (idUser user, token)
   where insertToken = "INSERT INTO NotificationTokens (UserID, Token) VALUES (?, ?)"

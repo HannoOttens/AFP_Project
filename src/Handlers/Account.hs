@@ -22,6 +22,7 @@ accountServer = login
 
 register :: RegisterForm -> AppM Handler PostRedirectHandler
 register form = trace "REGISTER" $ do
+    liftDbAction $ dbAddMessage "hoi"
     return $ redirect "login.html"
 
 login :: LoginForm -> AppM Handler PostRedirectHandler

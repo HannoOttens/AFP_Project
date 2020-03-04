@@ -35,6 +35,8 @@ executable AFP-Project
                      , transformers
                      , http-api-data
                      , time
+                     , transformers-base
+                     , split
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , PostRedirect
@@ -43,6 +45,7 @@ executable AFP-Project
                      , Models.Website
                      , Models.User
                      , Handlers.Account
+                     , Scraper
   default-language:    Haskell2010
 
 test-suite test
