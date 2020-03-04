@@ -1,12 +1,11 @@
 import Network.Wai.Handler.Warp
-import Database.SQLite.Simple
 import Servant
 import Control.Monad
 import Control.Monad.Reader
 import System.Cron.Schedule
 import qualified Data.Hashable as H
 
-import DBAdapter as DB
+import qualified DBAdapter as DB
 import Handlers.Account
 import Config
 import Scraper
@@ -32,16 +31,18 @@ api = Proxy
 runApp :: Config -> IO ()
 runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
 
-pollWebsites :: IO ()
-pollWebsites = do ws <- execDB DB.getWebsites
-                  mapM_ pollWebsite ws
+pollWebsites :: AppM IO ()
+pollWebsites = do 
+      ws <- DB.exec DB.getWebsites
+      mapM_ pollWebsite ws
 
-pollWebsite :: Website -> IO ()
-pollWebsite ws = do h <- H.hash <$> scrapePage (url ws)
+pollWebsite :: Website -> AppM IO ()
+pollWebsite ws = do liftIO $ putStrLn ("Polling: " ++ url ws)
+                    h <- liftIO $ H.hash <$> scrapePage (url ws)
                     let wid = idWebsite ws
-                    b <- execDB $ DB.checkWebsiteHash wid h
-                    when b $ do _ <- execDB $ DB.updateWebsiteHash wid h
-                                -- notify
+                    b <- DB.exec $ DB.checkWebsiteHash wid h
+                    when b $ do _ <- DB.exec $ DB.updateWebsiteHash wid h
+                                liftIO $ putStrLn "Changed"
                                 return ()
 
 execDB :: (Connection -> IO a) -> IO a
@@ -49,7 +50,7 @@ execDB f = runReaderT (DB.exec f) config
 
 main :: IO ()
 main = do
-  _ <- execSchedule $ do
-        addJob pollWebsites $ pollSchedule config 
-  runReaderT initDB config
+  _ <- execSchedule $
+        addJob (runReaderT pollWebsites config) $ pollSchedule config 
+  runReaderT DB.initDB config
   runApp config
