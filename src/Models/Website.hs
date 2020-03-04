@@ -3,8 +3,8 @@ module Models.Website where
 import Data.Time
 import Database.SQLite.Simple
 
-type URL = String
-type Hash = String
+type URL  = String
+type Hash = Int
 
 -- | Specifies a website
 data Website = Website {
