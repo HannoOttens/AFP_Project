@@ -1,7 +1,6 @@
 import Servant.Auth.Server
 
 import Network.Wai.Handler.Warp
-import Database.SQLite.Simple
 import Servant
 import Control.Monad
 import Control.Monad.Reader
@@ -14,21 +13,6 @@ import Config
 import Scraper
 import Models.Website
 import Models.User
-
-config :: IO Config
-config = 
-      do 
-      jwtKey <- generateKey
-      let cookieSets = defaultCookieSettings
-          jwtSets = defaultJWTSettings jwtKey
-      return $ Config {
-            dbFile = "db",
-            initFile = "tables.sqlite",
-            pollSchedule = "0-59 * * * *",
-            authConf = (cookieSets :. jwtSets :. EmptyContext),
-            cookieSettings = cookieSets,
-            jwtSettings = jwtSets
-      }
 
 type PublicAPI = LoginAPI 
       :<|> Raw
@@ -67,13 +51,10 @@ pollWebsite ws = do h <- H.hash <$> scrapePage (url ws)
                                 -- notify
                                 return ()
 
-execDB :: (Connection -> IO a) -> IO a
-execDB f = runReaderT (DB.exec f) config
-
 main :: IO ()
 main = do
   conf <- config
   _ <- execSchedule $ do
-        addJob (pollWebsites conf) $ pollSchedule conf 
+        addJob pollWebsites $ pollSchedule conf 
   runReaderT initDB conf
   runApp conf

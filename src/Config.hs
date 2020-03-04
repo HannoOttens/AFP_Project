@@ -14,3 +14,18 @@ data Config = Config {
       jwtSettings    :: JWTSettings,
       authConf       :: Context '[CookieSettings, JWTSettings]
 }
+
+config :: IO Config
+config = 
+      do 
+      jwtKey <- generateKey
+      let cookieSets = defaultCookieSettings
+          jwtSets = defaultJWTSettings jwtKey
+      return $ Config {
+            dbFile = "db",
+            initFile = "tables.sqlite",
+            pollSchedule = "0-59 * * * *",
+            authConf = (cookieSets :. jwtSets :. EmptyContext),
+            cookieSettings = cookieSets,
+            jwtSettings = jwtSets
+      }

@@ -2,7 +2,8 @@ module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader(asks, ask, mapReaderT)
+import Control.Monad.Reader
+import qualified Control.Monad.Trans.Reader as TR
 import Servant
 import Data.String
 import Data.Maybe(listToMaybe, isJust)
@@ -16,13 +17,17 @@ import Config
 -- | Initialize database with tables if do not already exist
 initDB :: AppM IO ()
 initDB = do
-  config <- ask
+  conf <- TR.ask
   liftIO $ do 
-    initQuery <- readFile (initFile config)
-    withConnection (dbFile config) (\conn -> mapM_ (execute_ conn) $ splitQuery initQuery)
+    initQuery <- readFile (initFile conf)
+    withConnection (dbFile conf) (\conn -> mapM_ (execute_ conn) $ splitQuery initQuery)
 
 splitQuery :: String -> [Query]
 splitQuery = map fromString . splitOn ";"
+
+execDB :: (Connection -> IO a) -> IO a
+execDB f = do conf <- config
+              runReaderT (exec f) conf
 
 liftDbAction :: (Connection -> IO a) -> AppM Handler a
 liftDbAction = mapReaderT liftIO . exec
@@ -30,7 +35,7 @@ liftDbAction = mapReaderT liftIO . exec
 -- | Execute an action on the database
 exec :: (Connection -> IO a) -> AppM IO a
 exec f = do 
-  file <- asks dbFile
+  file <- TR.asks dbFile
   liftIO $ withConnection file f
 
 
