@@ -1,3 +1,5 @@
+import Servant.Auth.Server
+
 import Network.Wai.Handler.Warp
 import Servant
 import Control.Monad
@@ -10,26 +12,32 @@ import Handlers.Account
 import Config
 import Scraper
 import Models.Website
+import Models.User
 
-config :: Config
-config = Config {
-      dbFile = "db",
-      initFile = "tables.sqlite",
-      pollSchedule = "0-59 * * * *"
-}
-
-type API = LoginAPI
+type PublicAPI = LoginAPI 
       :<|> Raw
+type ProtectedAPI = "account" :> LoginAPI
+type API auths = PublicAPI  
+            :<|> (Servant.Auth.Server.Auth auths User :> ProtectedAPI)
 
-server :: ServerT API (AppM Handler)
-server = accountServer
+protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppM Handler)
+protected (Servant.Auth.Server.Authenticated user) = accountServer
+protected _ = throwAll err401
+
+public:: ServerT PublicAPI (AppM Handler)
+public = accountServer
     :<|> serveDirectoryWebApp "www" 
 
-api :: Proxy API
+server :: ServerT (API auths) (AppM Handler)
+server = public :<|> protected 
+
+api :: Proxy (API '[JWT])
 api = Proxy
 
 runApp :: Config -> IO ()
-runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
+runApp conf = do
+      let authApi = (Proxy :: Proxy '[CookieSettings, JWTSettings])
+      run 8080 (serveWithContext api (authConf conf) $ hoistServerWithContext api authApi (`runReaderT` conf) server)
 
 pollWebsites :: AppM IO ()
 pollWebsites = do 
@@ -45,12 +53,10 @@ pollWebsite ws = do liftIO $ putStrLn ("Polling: " ++ url ws)
                                 liftIO $ putStrLn "Changed"
                                 return ()
 
-execDB :: (Connection -> IO a) -> IO a
-execDB f = runReaderT (DB.exec f) config
-
 main :: IO ()
 main = do
+  conf <- config
   _ <- execSchedule $
-        addJob (runReaderT pollWebsites config) $ pollSchedule config 
-  runReaderT DB.initDB config
-  runApp config
+        addJob (runReaderT pollWebsites conf) $ pollSchedule conf
+  runReaderT DB.initDB conf
+  runApp conf
