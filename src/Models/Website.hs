@@ -10,8 +10,8 @@ type Hash = String
 data Website = Website {
     idWebsite  :: Int,      
     url        :: URL,     -- | URL of webiste
-    lastUpdate :: UTCTime, -- | time of last change on website
-    hash       :: Hash     -- | hash of website contents
+    lastUpdate :: Maybe UTCTime, -- | time of last change on website
+    hash       :: Maybe Hash     -- | hash of website contents
 }
 
 instance FromRow Website where
