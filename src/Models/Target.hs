@@ -5,7 +5,7 @@ import Database.SQLite.Simple
 data Target = Target {
     websiteID :: Int,
     userID    :: Int,
-    selector  :: String  
+    selector  :: Maybe String  
 }
 
 instance FromRow Target where
