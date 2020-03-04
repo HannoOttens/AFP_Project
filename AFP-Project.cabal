@@ -23,10 +23,12 @@ executable AFP-Project
                      , TypeOperators
                      , OverloadedStrings
                      , DeriveGeneric
+                     , FlexibleContexts
   main-is:             Main.hs
   build-depends:       base
                      , servant-server
                      , servant-auth
+                     , servant-auth-server
                      , aeson
                      , warp
                      , sqlite-simple

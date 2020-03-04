@@ -4,6 +4,7 @@ module Handlers.Account (
 
 import Servant
 import Debug.Trace
+import Control.Monad.Trans.Reader(ask)
 
 import DBAdapter as DB
 import Models.Register as RM
@@ -12,7 +13,7 @@ import Models.User as UM
 import PostRedirect
 import Config
 
-type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> PostRedirect 301 String
+type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> PostCookieRedirect 301 String
            :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> PostRedirect 301 String
 
 accountServer :: ServerT LoginAPI (AppM Handler)
@@ -34,11 +35,12 @@ register form = trace "account/register" $ do
     else redirect "register.html"
 
 -- | Log in a user
-login :: LoginForm -> AppM Handler PostRedirectHandler
+login :: LoginForm -> AppM Handler LoginHandler
 login form = trace "account/login" $ do
     user <- liftDbAction $ DB.getUser (LM.username form)
+    conf <- ask
     case user of
-        Nothing -> redirect "login.html"
         Just u  -> if UM.password u == LM.password form
-                   then redirect "account.html"
-                   else redirect "login.html"
+                   then redirectWithCookie conf u "account.html"
+                   else throwError err401
+        Nothing -> throwError err401

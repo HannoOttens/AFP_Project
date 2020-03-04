@@ -1,3 +1,5 @@
+import Servant.Auth.Server
+
 import Network.Wai.Handler.Warp
 import Servant
 import Control.Monad
@@ -10,43 +12,65 @@ import Handlers.Account
 import Config
 import Scraper
 import Models.Website
+import Models.User
 
-config :: Config
-config = Config {
-      dbFile = "db",
-      initFile = "tables.sqlite",
-      pollSchedule = "0-59 * * * *"
-}
+config :: IO Config
+config = 
+      do 
+      jwtKey <- generateKey
+      let cookieSets = defaultCookieSettings
+          jwtSets = defaultJWTSettings jwtKey
+      return $ Config {
+            dbFile = "db",
+            initFile = "tables.sqlite",
+            pollSchedule = "0-59 * * * *",
+            authConf = (cookieSets :. jwtSets :. EmptyContext),
+            cookieSettings = cookieSets,
+            jwtSettings = jwtSets
+      }
 
-type API = LoginAPI
+type PublicAPI = LoginAPI 
       :<|> Raw
+type ProtectedAPI = "account" :> LoginAPI
+type API auths = PublicAPI  
+            :<|> (Servant.Auth.Server.Auth auths User :> ProtectedAPI)
 
-server :: ServerT API (AppM Handler)
-server = accountServer
+protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppM Handler)
+protected (Servant.Auth.Server.Authenticated user) = accountServer
+protected _ = throwAll err401
+
+public:: ServerT PublicAPI (AppM Handler)
+public = accountServer
     :<|> serveDirectoryWebApp "www" 
 
-api :: Proxy API
+server :: ServerT (API auths) (AppM Handler)
+server = public :<|> protected 
+
+api :: Proxy (API '[JWT])
 api = Proxy
 
 runApp :: Config -> IO ()
-runApp conf = run 8080 (serve api $ hoistServer api (`runReaderT` conf) server)
+runApp conf = do
+      let authApi = (Proxy :: Proxy '[CookieSettings, JWTSettings])
+      run 8080 (serveWithContext api (authConf conf) $ hoistServerWithContext api authApi (`runReaderT` conf) server)
 
-pollWebsites :: IO ()
-pollWebsites = do ws <- runReaderT (DB.exec DB.getWebsites) config
-                  _ <- mapM pollWebsite ws
-                  return ()
+pollWebsites :: Config -> IO ()
+pollWebsites conf = do ws <- runReaderT (DB.exec DB.getWebsites) conf
+                       _ <- mapM (pollWebsite conf) ws
+                       return ()
 
-pollWebsite :: Website -> IO ()
-pollWebsite ws = do h <- H.hash <$> scrapePage (url ws)
-                    let wid = idWebsite ws
-                    b <- runReaderT (DB.exec $ DB.checkWebsiteHash wid h) config
-                    when b $ do _ <- runReaderT (DB.exec $ DB.updateWebsiteHash wid h) config
-                                -- notify
-                                return ()
+pollWebsite :: Config -> Website -> IO ()
+pollWebsite conf ws = do h <- H.hash <$> scrapePage (url ws)
+                         let wid = idWebsite ws
+                         b <- runReaderT (DB.exec $ DB.checkWebsiteHash wid h) conf
+                         when b $ do _ <- runReaderT (DB.exec $ DB.updateWebsiteHash wid h) conf
+                                     -- notify
+                                     return ()
 
 main :: IO ()
 main = do
+  conf <- config
   _ <- execSchedule $ do
-        addJob pollWebsites $ pollSchedule config 
-  runReaderT initDB config
-  runApp config
+        addJob (pollWebsites conf) $ pollSchedule conf 
+  runReaderT initDB conf
+  runApp conf
