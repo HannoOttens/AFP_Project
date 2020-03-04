@@ -39,6 +39,8 @@ executable AFP-Project
                      , split
                      , cron
                      , text
+                     , HTTP
+                     , tagsoup
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , Config

@@ -2,7 +2,7 @@ module DBAdapter where
 
 import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader(asks, ask)
+import Control.Monad.Trans.Reader(asks, ask, mapReaderT)
 import Servant
 import Data.String
 import Data.Maybe(listToMaybe, isJust)
