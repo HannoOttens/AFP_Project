@@ -3,7 +3,7 @@ module Models.User where
 import Database.SQLite.Simple
 
 data User = User {
-    idUser     :: Int,          
+    id         :: Int,          
     username   :: String,
     password   :: String
 }
