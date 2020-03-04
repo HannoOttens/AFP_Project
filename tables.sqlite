@@ -17,7 +17,7 @@ Create Table If Not Exists Websites (
 	WebsiteID Integer Not Null,
 	URL Text Not Null,
 	LastUpdate Integer,
-	Hash Text,
+	Hash Integer,
 	Primary Key (WebsiteID)
 );
 

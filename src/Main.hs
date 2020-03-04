@@ -1,6 +1,7 @@
 import Servant.Auth.Server
 
 import Network.Wai.Handler.Warp
+import Database.SQLite.Simple
 import Servant
 import Control.Monad
 import Control.Monad.Reader
@@ -54,18 +55,20 @@ runApp conf = do
       let authApi = (Proxy :: Proxy '[CookieSettings, JWTSettings])
       run 8080 (serveWithContext api (authConf conf) $ hoistServerWithContext api authApi (`runReaderT` conf) server)
 
-pollWebsites :: Config -> IO ()
-pollWebsites conf = do ws <- runReaderT (DB.exec DB.getWebsites) conf
-                       _ <- mapM (pollWebsite conf) ws
-                       return ()
+pollWebsites :: IO ()
+pollWebsites = do ws <- execDB DB.getWebsites
+                  mapM_ pollWebsite ws
 
-pollWebsite :: Config -> Website -> IO ()
-pollWebsite conf ws = do h <- H.hash <$> scrapePage (url ws)
-                         let wid = idWebsite ws
-                         b <- runReaderT (DB.exec $ DB.checkWebsiteHash wid h) conf
-                         when b $ do _ <- runReaderT (DB.exec $ DB.updateWebsiteHash wid h) conf
-                                     -- notify
-                                     return ()
+pollWebsite :: Website -> IO ()
+pollWebsite ws = do h <- H.hash <$> scrapePage (url ws)
+                    let wid = idWebsite ws
+                    b <- execDB $ DB.checkWebsiteHash wid h
+                    when b $ do _ <- execDB $ DB.updateWebsiteHash wid h
+                                -- notify
+                                return ()
+
+execDB :: (Connection -> IO a) -> IO a
+execDB f = runReaderT (DB.exec f) config
 
 main :: IO ()
 main = do
