@@ -18,10 +18,10 @@ initDB = do
   config <- ask
   liftIO $ do 
     initQuery <- readFile (initFile config)
-    withConnection (dbFile config) (`execute_` composeQuery initQuery)
+    withConnection (dbFile config) (\conn -> mapM_ (execute_ conn) $ splitQuery initQuery)
 
-composeQuery :: String -> Query
-composeQuery = foldMap fromString . splitOn ";" 
+splitQuery :: String -> [Query]
+splitQuery = map fromString . splitOn ";"
 
 liftDbAction :: (Connection -> IO a) -> AppM Handler a
 liftDbAction = mapReaderT liftIO . dbExec
@@ -43,6 +43,10 @@ dbGetMessages conn = let result = query_ conn "SELECT msg FROM messages"
 dbAddWebsite :: Website -> Connection -> IO ()
 dbAddWebsite website conn = execute conn insertWebsite (url website, hash website)
   where insertWebsite = "INSERT INTO Websites (URL, LastUpdate, Hash) VALUES (?, NOW(), ?)"
+
+dbGetWebsites :: Connection -> IO [Website]
+dbGetWebsites conn = query_ conn getWebsites
+  where getWebsites = "SELECT * FROM Websites"
 
 -- | Check if website hash has changed, returns True if it has changed or website is not found
 dbCheckWebsiteHash :: Int -> Int -> Connection -> IO Bool
@@ -80,6 +84,6 @@ dbGetUser name conn = do
 
 -- | Add notification token for user to database
 dbAddToken :: UM.User -> String -> Connection -> IO ()
-dbAddToken user token conn = do
+dbAddToken user token conn =
     execute conn insertToken (UM.id user, token)
   where insertToken = "INSERT INTO NotificationTokens (UserID, Token) VALUES (?, ?)"
