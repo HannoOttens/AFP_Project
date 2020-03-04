@@ -30,7 +30,7 @@ executable AFP-Project
                      , aeson
                      , warp
                      , sqlite-simple
-                     , scalpel
+                     , hashable
                      , mtl
                      , transformers
                      , http-api-data
