@@ -10,13 +10,6 @@ import Data.Maybe(listToMaybe, isJust)
 import Models.Website
 import Models.User
 
--- | Configuration 
-data Config = Config
-  { 
-    dbFile   :: String, -- | Path to the sqlite database file
-    initFile :: String  -- | Path to the file containing create table statement
-  }
-
 type AppM m = ReaderT Config m
 
 -- | Initialize database with tables if do not already exist
