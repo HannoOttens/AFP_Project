@@ -9,6 +9,7 @@ import Data.Maybe(listToMaybe, isJust)
 
 import Models.Website
 import Models.User
+import Config
 
 type AppM m = ReaderT Config m
 

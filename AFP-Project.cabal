@@ -36,6 +36,7 @@ executable AFP-Project
                      , http-api-data
                      , time
                      , cron
+                     , text
   hs-source-dirs:      src
   other-modules:       DBAdapter
                      , PostRedirect

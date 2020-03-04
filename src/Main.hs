@@ -5,7 +5,14 @@ import System.Cron.Schedule
 
 import DBAdapter
 import Handlers.Account
+import Config
 
+config :: Config
+config = Config {
+      dbFile = "db",
+      initFile = "tables.sqlite",
+      pollSchedule = "0-59 * * * *"
+}
 
 type API = LoginAPI
       :<|> Raw
@@ -26,6 +33,6 @@ pollWebsites = putStrLn "HeY! A MaN Has FaLLeN iN tHe WaTER in LEgo CiTY!!!"
 main :: IO ()
 main = do
   pids <- execSchedule $ do
-        addJob poll $ pollSchedule config 
+        addJob pollWebsites $ pollSchedule config 
   runReaderT initDB config
   runApp config
