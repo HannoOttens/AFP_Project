@@ -44,7 +44,7 @@ addWebsite website conn = do
       Nothing -> do 
         execute conn insertWebsite (WM.url website, WM.hash website)
         fromIntegral <$> lastInsertRowId conn
-  where insertWebsite = "INSERT INTO Websites (URL, LastUpdate, Hash) VALUES (?, NOW(), ?)"
+  where insertWebsite = "INSERT INTO Websites (URL, LastUpdate, Hash) VALUES (?, datetime('now'), ?)"
 
 -- | Lookup if given URL is already in the database
 getWebsiteByURL :: String -> Connection -> IO (Maybe WM.Website)
@@ -71,7 +71,7 @@ updateWebsiteHash :: Int -> Int -> Connection -> IO Bool
 updateWebsiteHash websiteID newHash conn = do
     execute conn updateHash (newHash, websiteID)
     (== 1) <$> changes conn
-  where updateHash = "UPDATE Websites SET Hash = ?, LastUpdate = NOW() WHERE WebsiteID = ?"
+  where updateHash = "UPDATE Websites SET Hash = ?, LastUpdate = datetime('now') WHERE WebsiteID = ?"
 
 
 {-| Add a new user to the database, if username is not already in use.
