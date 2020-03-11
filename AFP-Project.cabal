@@ -33,8 +33,10 @@ library
     , Models.Website
     , Models.User
     , Models.Target
+    , Models.Notification
     , Handlers.Account
     , Scraper
+    , Notification
   hs-source-dirs:
       src
   build-depends:
@@ -56,6 +58,9 @@ library
     , text
     , HTTP
     , tagsoup
+    , web-push
+    , lens
+    , http-client
   default-language: Haskell2010
 
 executable AFP-Project
@@ -63,7 +68,7 @@ executable AFP-Project
   main-is:             Main.hs
   hs-source-dirs:      src
   default-language:    Haskell2010
-  exposed-modules:
+  other-modules:
       DBAdapter
     , Config
     , PostRedirect
@@ -72,8 +77,10 @@ executable AFP-Project
     , Models.Website
     , Models.User
     , Models.Target
+    , Models.Notification
     , Handlers.Account
     , Scraper
+    , Notification
   default-extensions:  
       DataKinds
     , TypeOperators
@@ -100,6 +107,9 @@ executable AFP-Project
     , text
     , HTTP
     , tagsoup
+    , web-push
+    , lens
+    , http-client
 
 test-suite test
   default-language: Haskell2010

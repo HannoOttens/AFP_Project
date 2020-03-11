@@ -8,7 +8,9 @@ Create Table If Not Exists Users (
 -- Tokens that user defined
 Create Table If Not Exists NotificationTokens (
 	UserID Integer Not Null,
-	Token Text Not Null,
+	Endpoint Text Not Null,
+	P256dh Text Not Null,
+	Auth Text Not Null,
 	Foreign Key (UserID) References Users (UserID)
 );
 
