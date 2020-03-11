@@ -15,7 +15,7 @@ import qualified Models.Target as TM
 import Config
 
 -- | Initialize database with tables if do not already exist
-initDB :: AppM IO ()
+initDB :: AppConfig IO ()
 initDB = do
   conf <- TR.ask
   liftIO $ do 
@@ -29,11 +29,11 @@ execDB :: (Connection -> IO a) -> IO a
 execDB f = do conf <- config
               runReaderT (exec f) conf
 
-liftDbAction :: (Connection -> IO a) -> AppM Handler a
+liftDbAction :: (Connection -> IO a) -> AppConfig Handler a
 liftDbAction = mapReaderT liftIO . exec
 
 -- | Execute an action on the database
-exec :: (Connection -> IO a) -> AppM IO a
+exec :: (Connection -> IO a) -> AppConfig IO a
 exec f = do 
   file <- TR.asks dbFile
   liftIO $ withConnection file f

@@ -19,12 +19,12 @@ type LoginHeaders a = Headers '[Header "Set-Cookie" SetCookie, Header "Set-Cooki
 type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[JSON] (LoginHeaders LM.LoginResponse)
            :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> PostRedirect 301 String
 
-accountServer :: ServerT LoginAPI (AppM Handler)
+accountServer :: ServerT LoginAPI (AppConfig Handler)
 accountServer = login 
            :<|> register 
 
 -- | Register a user
-register :: RegisterForm -> AppM Handler PostRedirectHandler
+register :: RegisterForm -> AppConfig Handler PostRedirectHandler
 register form = trace "account/register" $ do
     if RM.password form == RM.rpassword form
     then do
@@ -38,7 +38,7 @@ register form = trace "account/register" $ do
     else redirect "register.html"
 
 -- | Log in a user
-login :: LoginForm -> AppM Handler (LoginHeaders LM.LoginResponse)
+login :: LoginForm -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 login form = trace "account/login" $ do
     user <- liftDbAction $ DB.getUser (LM.username form)
     case user of
@@ -49,7 +49,7 @@ login form = trace "account/login" $ do
 
 
 
-returnLoginSuccess :: User -> AppM Handler (LoginHeaders LM.LoginResponse)
+returnLoginSuccess :: User -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 returnLoginSuccess user = do 
   conf <- ask
   mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user

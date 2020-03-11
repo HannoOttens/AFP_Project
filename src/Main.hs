@@ -5,6 +5,7 @@ import Servant.Auth.Server
 import Servant.Auth.Server.SetCookieOrphan ()
 import Control.Monad
 import Control.Monad.Reader
+import Control.Monad.State
 import System.Cron.Schedule
 import qualified Data.Hashable as H
 
@@ -24,17 +25,17 @@ type API = PublicAPI
             :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI
             :<|> RawFiles
 
-rawFiles :: ServerT RawFiles (AppM Handler)
+rawFiles :: ServerT RawFiles (AppConfig Handler)
 rawFiles = serveDirectoryWebApp "www"
 
-protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppM Handler)
-protected (Servant.Auth.Server.Authenticated user) = local (\cfg -> cfg { currentUser = Just user }) targetServer
+protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)
+protected (Servant.Auth.Server.Authenticated user) = evalStateT targetServer user
 protected _ = throwAll err401
 
-public:: ServerT PublicAPI (AppM Handler)
+public:: ServerT PublicAPI (AppConfig Handler)
 public = accountServer
 
-server :: ServerT API (AppM Handler)
+server :: ServerT API (AppConfig Handler)
 server = public 
       :<|> protected 
       :<|> rawFiles
@@ -47,12 +48,12 @@ runApp conf = do
       let authApi = (Proxy :: Proxy '[CookieSettings, JWTSettings])
       run 8080 (serveWithContext api (authConf conf) $ hoistServerWithContext api authApi (`runReaderT` conf) server)
 
-pollWebsites :: AppM IO ()
+pollWebsites :: AppConfig IO ()
 pollWebsites = do 
       ws <- DB.exec DB.getWebsites
       mapM_ pollWebsite ws
 
-pollWebsite :: Website -> AppM IO ()
+pollWebsite :: Website -> AppConfig IO ()
 pollWebsite ws = do
       let u   = url ws
       let wid = idWebsite ws
@@ -63,7 +64,7 @@ pollWebsite ws = do
                   liftIO $ putStrLn "Changed"
                   return ()
 
-pollTargets :: AppM IO ()
+pollTargets :: AppConfig IO ()
 pollTargets = do 
       ws <- DB.exec DB.getWebsites
       mapM_ (\w -> do
@@ -77,7 +78,7 @@ pollTargets = do
                   _ <- DB.exec $ DB.updateWebsiteHash wid h
                   mapM_ (`pollTarget` w) ts) ws
       
-pollTarget :: Target -> Website -> AppM IO ()
+pollTarget :: Target -> Website -> AppConfig IO ()
 pollTarget t w = do
       let (Just e) = selector t
       let u        = url w

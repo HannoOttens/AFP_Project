@@ -24,14 +24,14 @@ type LoginHandler = Headers '[Header "Location" String
 
 redirect
   :: String -- ^ what to put in the 'Location' header
-  -> AppM Handler PostRedirectHandler
+  -> AppConfig Handler PostRedirectHandler
 redirect a = return $ (addHeader a NoContent)
 
 redirectWithCookie
   :: Config
   -> User
   -> String -- ^ what to put in the 'Location' header
-  -> AppM Handler LoginHandler
+  -> AppConfig Handler LoginHandler
 redirectWithCookie conf user a = do
   mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
   case mApplyCookies of

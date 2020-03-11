@@ -5,23 +5,17 @@ module Handlers.Targets (
 import Servant
 import Debug.Trace
 import Control.Monad.Reader
+import Control.Monad.State
+
 
 import Config
 
 type TargetsAPI = "secure" :> Get '[JSON] NoContent
 
-targetServer :: ServerT TargetsAPI (AppM Handler)
+targetServer :: ServerT TargetsAPI (AppContext Handler)
 targetServer = secure
 
-
-secure :: AppM Handler NoContent
+secure :: AppContext Handler NoContent
 secure = do
-    ~(Just user) <- asks currentUser
+    user <- get
     trace (show user) $ return NoContent
-
--- | Delete a target
--- deleteTarget :: Int -> AppM Handler PostRedirectHandler
-
--- | Update a target
-
--- | Update a target
