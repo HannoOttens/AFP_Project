@@ -109,4 +109,35 @@ addToken user token conn =
 getTargetsOnWebsite :: Int -> Connection -> IO [TM.Target]
 getTargetsOnWebsite websiteID conn = 
     query conn lookupTargets (Only websiteID)
-  where lookupTargets = "SELECT WebsiteID, UserID, Selector FROM Targets WHERE websiteID = ?"
+  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector FROM Targets WHERE websiteID = ?"
+
+-- | Add given target to the database and returns if the action was successful
+addTarget :: TM.Target -> Connection -> IO Bool
+addTarget target conn = do execute conn insertTarget target
+                           (== 1) <$> changes conn
+  where insertTarget = "INSERT INTO Targets (UserID, WebsiteID, Selector) VALUES (?,?,?)"
+
+-- | Update the website and/or selector of the given target and return if the action was successful
+editTarget :: TM.Target -> Connection -> IO Bool
+editTarget t conn = do execute conn updateTarget (TM.websiteID t, TM.selector t, TM.id t)
+                       (== 1) <$> changes conn
+  where updateTarget = "UPDATE Targets SET WebsiteID = ?, Selector = ? WHERE TargetID = ?"
+
+-- | Delete the target with the given id from the database
+removeTarget :: Int -> Connection -> IO Bool
+removeTarget targetID conn = do execute conn deleteTarget (Only targetID)
+                                (== 1) <$> changes conn
+  where deleteTarget = "DELETE FROM Targets WHERE TargetID = ?" 
+
+-- | Get all targets of given user 
+getTargetsOfUser :: Int -> Connection -> IO [TM.Target]
+getTargetsOfUser userID conn = 
+    query conn lookupTargets (Only userID)
+  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector FROM Targets WHERE UserID = ?"
+
+-- | Checks if there are websites in the database that are not targeted, so they can be removed
+removeUnusedWebsites :: Connection -> IO Int
+removeUnusedWebsites conn = do execute_ conn deleteWebsites
+                               changes conn
+  where deleteWebsites = "DELETE FROM Websites WHERE Websites.WebsiteID NOT IN (SELECT WebsiteID FROM Targets)" 
+
