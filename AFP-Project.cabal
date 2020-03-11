@@ -67,20 +67,21 @@ executable AFP-Project
   ghc-options:         -Wall
   main-is:             Main.hs
   hs-source-dirs:      src
+  other-modules:       DBAdapter
+                     , Config
+                     , PostRedirect
+                     , Models.Login
+                     , Models.Register
+                     , Models.Website
+                     , Models.User
+                     , Models.Target
+                     , Models.Notification
+                     , Handlers.Account
+                     , Handlers.Targets
+                     , Scraper
+                     , Notification
   default-language:    Haskell2010
-  other-modules:
-      DBAdapter
-    , Config
-    , PostRedirect
-    , Models.Login
-    , Models.Register
-    , Models.Website
-    , Models.User
-    , Models.Target
-    , Models.Notification
-    , Handlers.Account
-    , Scraper
-    , Notification
+
   default-extensions:  
       DataKinds
     , TypeOperators

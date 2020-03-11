@@ -2,10 +2,10 @@
 module PostRedirect where
 
 -- Source: https://gist.github.com/alpmestan/757094ecf9401f85c5ba367ca20b8900
-import Control.Monad.Trans (liftIO)
 import GHC.TypeLits
 import Servant
 import Servant.Auth.Server
+import Control.Monad.Trans (liftIO)
 
 import Config
 import Models.User
@@ -23,17 +23,15 @@ type LoginHandler = Headers '[Header "Location" String
                             , Header "Set-Cookie" SetCookie] NoContent
 
 redirect
-  :: ToHttpApiData String
-  => String -- ^ what to put in the 'Location' header
-  -> AppM Handler PostRedirectHandler
+  :: String -- ^ what to put in the 'Location' header
+  -> AppConfig Handler PostRedirectHandler
 redirect a = return $ (addHeader a NoContent)
 
 redirectWithCookie
-  :: ToHttpApiData String
-  => Config
+  :: Config
   -> User
   -> String -- ^ what to put in the 'Location' header
-  -> AppM Handler LoginHandler
+  -> AppConfig Handler LoginHandler
 redirectWithCookie conf user a = do
   mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
   case mApplyCookies of

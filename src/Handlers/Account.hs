@@ -3,8 +3,10 @@ module Handlers.Account (
 ) where
 
 import Servant
+import Servant.Auth.Server
+import Control.Monad.Trans (liftIO)
+import Control.Monad.Reader (ask)
 import Debug.Trace
-import Control.Monad.Trans.Reader(ask)
 
 import DBAdapter as DB
 import Models.Register as RM
@@ -13,15 +15,16 @@ import Models.User as UM
 import PostRedirect
 import Config
 
-type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> PostCookieRedirect 301 String
+type LoginHeaders a = Headers '[Header "Set-Cookie" SetCookie, Header "Set-Cookie" SetCookie] a
+type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[JSON] (LoginHeaders LM.LoginResponse)
            :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> PostRedirect 301 String
 
-accountServer :: ServerT LoginAPI (AppM Handler)
+accountServer :: ServerT LoginAPI (AppConfig Handler)
 accountServer = login 
            :<|> register 
 
 -- | Register a user
-register :: RegisterForm -> AppM Handler PostRedirectHandler
+register :: RegisterForm -> AppConfig Handler PostRedirectHandler
 register form = trace "account/register" $ do
     if RM.password form == RM.rpassword form
     then do
@@ -35,12 +38,21 @@ register form = trace "account/register" $ do
     else redirect "register.html"
 
 -- | Log in a user
-login :: LoginForm -> AppM Handler LoginHandler
+login :: LoginForm -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 login form = trace "account/login" $ do
     user <- liftDbAction $ DB.getUser (LM.username form)
-    conf <- ask
     case user of
         Just u  -> if UM.password u == LM.password form
-                   then redirectWithCookie conf u "account.html"
-                   else throwError err401
-        Nothing -> throwError err401
+                   then returnLoginSuccess u
+                   else throwError err401 -- return $ LM.LoginResponse { loginSuccess = False, redirectTo = ""}
+        Nothing -> throwError err401 -- return $ LM.LoginResponse { loginSuccess = False, redirectTo = ""}
+
+
+
+returnLoginSuccess :: User -> AppConfig Handler (LoginHeaders LM.LoginResponse)
+returnLoginSuccess user = do 
+  conf <- ask
+  mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
+  case mApplyCookies of
+    Nothing           -> throwError err401
+    Just applyCookies -> return . applyCookies $ LM.LoginResponse { loginSuccess = True, redirectTo = "account.html"}
