@@ -136,13 +136,13 @@ getTargetsOnWebsite websiteID conn =
 addTarget :: TM.Target -> Connection -> IO Bool
 addTarget target conn = do execute conn insertTarget target
                            isSuccessful conn
-  where insertTarget = "INSERT INTO Targets (UserID, WebsiteID, Selector) VALUES (?,?,?)"
+  where insertTarget = "INSERT INTO Targets (UserID, WebsiteID, Selector, Hash) VALUES (?,?,?,?)"
 
 -- | Update the website and/or selector of the given target and return if the action was successful
 editTarget :: TM.Target -> Connection -> IO Bool
-editTarget t conn = do execute conn updateTarget (TM.websiteID t, TM.selector t, TM.id t)
+editTarget t conn = do execute conn updateTarget (TM.websiteID t, TM.selector t, TM.hash t, TM.id t)
                        isSuccessful conn
-  where updateTarget = "UPDATE Targets SET WebsiteID = ?, Selector = ? WHERE TargetID = ?"
+  where updateTarget = "UPDATE Targets SET WebsiteID = ?, Selector = ?, Hash = ? WHERE TargetID = ?"
 
 -- | Delete the target with the given id from the database
 removeTarget :: Int -> Connection -> IO Bool
@@ -154,7 +154,7 @@ removeTarget targetID conn = do execute conn deleteTarget (Only targetID)
 getTargetsOfUser :: Int -> Connection -> IO [TM.Target]
 getTargetsOfUser userID conn = 
     query conn lookupTargets (Only userID)
-  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector FROM Targets WHERE UserID = ?"
+  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector, Hash FROM Targets WHERE UserID = ?"
 
 -- | Checks if there are websites in the database that are not targeted, so they can be removed
 removeUnusedWebsites :: Connection -> IO Int

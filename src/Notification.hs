@@ -17,13 +17,13 @@ newPushNotification msg (endpoint, hash, auth) = set pushMessage msg notificatio
     where notification = mkPushNotification (T.pack endpoint) (T.pack hash) (T.pack auth)
 
 -- | Lookup notifications details for user and construct push message 
-createNotificationDetails :: Int -> NotificationMessage -> AppM IO [PushMsg]
+createNotificationDetails :: Int -> NotificationMessage -> AppConfig IO [PushMsg]
 createNotificationDetails userID msg = do 
     details <- DB.exec $ DB.getTokens userID
     return $ map (newPushNotification msg) details
 
 -- | Send all notifications to recipients, if endpoint is not found return endpoint url so it can be removed from database
-sendNotifications :: VAPIDKeys -> Manager -> [PushMsg] -> AppM IO [String]
+sendNotifications :: VAPIDKeys -> Manager -> [PushMsg] -> AppConfig IO [String]
 sendNotifications keys m msgs = map (T.unpack . view pushEndpoint) <$> filterM p msgs
     where p msg = do response <- sendPushNotification keys m msg
                      return $ case response of

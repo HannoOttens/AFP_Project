@@ -8,7 +8,7 @@ data Target = Target {
     id        :: Int,
     userID    :: Int,
     websiteID :: Int,
-    selector  :: Maybe String  
+    selector  :: Maybe String,  
     hash      :: Maybe Hash     -- | hash of target content
 }
 

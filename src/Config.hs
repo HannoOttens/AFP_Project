@@ -20,7 +20,7 @@ data Config = Config {
       pollSchedule   :: Text,   -- | CRON-schedule for polling the websites
       cookieSettings :: CookieSettings, -- | Settings for cookies
       jwtSettings    :: JWTSettings,    -- | Settings for JWT
-      authConf       :: Context '[CookieSettings, JWTSettings] -- | Combined settings for JWT and cookies
+      authConf       :: Context '[CookieSettings, JWTSettings], -- | Combined settings for JWT and cookies
       vapidKeys      :: VAPIDKeysMinDetails -- | representing a unique VAPID key pair for push notifications
 }
 
