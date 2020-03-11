@@ -9,7 +9,7 @@ data User = User {
     id         :: Int,          
     username   :: String,
     password   :: String
-} deriving (Generic)
+} deriving (Generic, Show)
 
 instance FromRow User where
     fromRow = User <$> field <*> field <*> field

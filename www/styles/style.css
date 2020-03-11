@@ -116,3 +116,14 @@ td {
 .red {
     fill:red;
 }
+
+.NoDisplay {
+    display: none;
+}
+
+.ErrorMsg {
+    border: 1px red;
+    background-color: rgb(255, 170, 170);
+    padding: 15px;
+    border-radius: 5px;
+}

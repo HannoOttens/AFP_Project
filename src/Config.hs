@@ -4,6 +4,8 @@ import Control.Monad.Trans.Reader(ReaderT)
 import Servant
 import Servant.Auth.Server
 
+import Models.User as UM
+
 type AppM m = ReaderT Config m
 
 data Config = Config { 
@@ -12,14 +14,15 @@ data Config = Config {
       pollSchedule   :: Text,   -- | CRON-schedule for polling the websites
       cookieSettings :: CookieSettings,
       jwtSettings    :: JWTSettings,
-      authConf       :: Context '[CookieSettings, JWTSettings]
+      authConf       :: Context '[CookieSettings, JWTSettings],
+      currentUser    :: Maybe User
 }
 
 config :: IO Config
 config = 
       do 
       jwtKey <- generateKey
-      let cookieSets = defaultCookieSettings
+      let cookieSets = defaultCookieSettings { cookieIsSecure  = NotSecure }
           jwtSets = defaultJWTSettings jwtKey
       return $ Config {
             dbFile = "db",
@@ -27,5 +30,6 @@ config =
             pollSchedule = "0-59 * * * *",
             authConf = (cookieSets :. jwtSets :. EmptyContext),
             cookieSettings = cookieSets,
-            jwtSettings = jwtSets
+            jwtSettings = jwtSets,
+            currentUser = Nothing
       }

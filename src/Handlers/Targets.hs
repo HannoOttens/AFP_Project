@@ -1,25 +1,28 @@
-module Handlers.Account (
-    LoginAPI, accountServer 
+module Handlers.Targets (
+    TargetsAPI, targetServer 
 ) where
 
 import Servant
 import Debug.Trace
+import Servant.Auth.Server
+import Control.Monad.Reader
 
-import DBAdapter as DB
-import Models.Register as RM
-import Models.Login as LM
 import Models.User as UM
-import PostRedirect
 import Config
 
-type TargetAPI = "delete" :> ReqBody '[FormUrlEncoded] LoginForm    :> PostRedirect 301 String
+type TargetsAPI = "secure" :> Get '[JSON] NoContent
 
-accountServer :: ServerT LoginAPI (AppM Handler)
-accountServer = login 
-           :<|> register 
+targetServer :: ServerT TargetsAPI (AppM Handler)
+targetServer = secure
+
+
+secure :: AppM Handler NoContent
+secure = do
+    ~(Just user) <- asks currentUser
+    trace (show user) $ return NoContent
 
 -- | Delete a target
-deleteTarget :: Int -> AppM Handler PostRedirectHandler
+-- deleteTarget :: Int -> AppM Handler PostRedirectHandler
 
 -- | Update a target
 

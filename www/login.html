@@ -1,24 +1,58 @@
 <html>
-    <link rel="stylesheet" type="text/css" href="styles/style.css">
+<link rel="stylesheet" type="text/css" href="styles/style.css">
+<script type="text/javascript" src="scripts/jquery.3.4.1.js"></script>
+<script type="text/javascript" src="scripts/xsrf.js"></script>
+
 <head>
 </head>
 <body>
     <div class=center>
         <div class=login>
+            <div class="ErrorMsg NoDisplay">Failed to log in, please try again</div>
             <h1>
                 Welcome
             </h1>
-
-            <form action="login" method="POST" enctype="application/x-www-form-urlencoded">
+            <form id=loginForm action=login method="POST" enctype="application/x-www-form-urlencoded">
                 <label>Username:</label>
-                <input name=username />
+                <input id=username name=username />
                 <label>Password:</label>
-                <input name=password  type="password"/>
+                <input id=password name=password type="password" />
                 <button type="submit" class="mt10 pull-right">Log in</button>
                 <button type="button" class="mt10 pull-right flat"
                     onclick="window.location.href = 'register.html'">Register</button>
             </form>
         </div>
     </div>
+
+    <script>
+        $(() => {
+            $("#loginForm").submit(function (event) {
+                console.log('EE!');
+                event.preventDefault();
+                /* get the action attribute from the <form action=""> element */
+                var $form = $(this),
+                    url = $form.attr('action');
+                /* Send the data using post with element id name and name2*/
+                var formData = $("#loginForm").serialize();
+                posting = $.ajax({
+                    type: 'POST',
+                    url: 'login',
+                    data: formData,
+                    success: function (resp, textStatus, XMLHttpRequest) {
+
+                        if (resp && resp.loginSuccess) {
+                            setXSRF();
+                            window.location.href = resp.redirectTo;
+                        }
+                        else
+                            $('.ErrorMsg').show();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        $('.ErrorMsg').show();
+                    },
+                });
+            });
+        });
+    </script>
 </body>
 </html>

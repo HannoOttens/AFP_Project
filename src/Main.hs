@@ -1,37 +1,45 @@
-import Servant.Auth.Server
 
 import Network.Wai.Handler.Warp
 import Servant
+import Servant.Auth.Server
+import Servant.Auth.Server.SetCookieOrphan ()
 import Control.Monad
 import Control.Monad.Reader
 import System.Cron.Schedule
 import qualified Data.Hashable as H
+import Debug.Trace
 
 import DBAdapter as DB
 import Handlers.Account
+import Handlers.Targets
 import Config
 import Scraper
 import Models.Website
 import Models.User
 
 type PublicAPI = LoginAPI 
-      :<|> Raw
-type ProtectedAPI = "account" :> LoginAPI
-type API auths = PublicAPI  
-            :<|> (Servant.Auth.Server.Auth auths User :> ProtectedAPI)
+type ProtectedAPI = TargetsAPI
+type RawFiles = Raw
+type API = PublicAPI  
+            :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI
+            :<|> RawFiles
+
+rawFiles :: ServerT RawFiles (AppM Handler)
+rawFiles = serveDirectoryWebApp "www"
 
 protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppM Handler)
-protected (Servant.Auth.Server.Authenticated user) = accountServer
+protected (Servant.Auth.Server.Authenticated user) = local (\cfg -> cfg { currentUser = Just user }) targetServer
 protected _ = throwAll err401
 
 public:: ServerT PublicAPI (AppM Handler)
 public = accountServer
-    :<|> serveDirectoryWebApp "www" 
 
-server :: ServerT (API auths) (AppM Handler)
-server = public :<|> protected 
+server :: ServerT API (AppM Handler)
+server = public 
+      :<|> protected 
+      :<|> rawFiles
 
-api :: Proxy (API '[JWT])
+api :: Proxy API 
 api = Proxy
 
 runApp :: Config -> IO ()
