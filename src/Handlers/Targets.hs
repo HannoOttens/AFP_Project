@@ -4,10 +4,8 @@ module Handlers.Targets (
 
 import Servant
 import Debug.Trace
-import Servant.Auth.Server
 import Control.Monad.Reader
 
-import Models.User as UM
 import Config
 
 type TargetsAPI = "secure" :> Get '[JSON] NoContent

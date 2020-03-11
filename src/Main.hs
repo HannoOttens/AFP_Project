@@ -7,7 +7,6 @@ import Control.Monad
 import Control.Monad.Reader
 import System.Cron.Schedule
 import qualified Data.Hashable as H
-import Debug.Trace
 
 import qualified DBAdapter as DB
 import Handlers.Account
