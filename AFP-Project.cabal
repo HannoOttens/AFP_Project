@@ -63,6 +63,43 @@ executable AFP-Project
   main-is:             Main.hs
   hs-source-dirs:      src
   default-language:    Haskell2010
+  exposed-modules:
+      DBAdapter
+    , Config
+    , PostRedirect
+    , Models.Login
+    , Models.Register
+    , Models.Website
+    , Models.User
+    , Models.Target
+    , Handlers.Account
+    , Scraper
+  default-extensions:  
+      DataKinds
+    , TypeOperators
+    , OverloadedStrings
+    , DeriveGeneric
+    , FlexibleContexts
+  build-depends:
+      AFP-Project
+    , base
+    , servant-server
+    , servant-auth
+    , servant-auth-server
+    , aeson
+    , warp
+    , sqlite-simple
+    , hashable
+    , mtl
+    , transformers
+    , http-api-data
+    , time
+    , transformers-base
+    , split
+    , cron
+    , text
+    , HTTP
+    , tagsoup
 
 test-suite test
   default-language: Haskell2010
