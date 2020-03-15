@@ -11,9 +11,10 @@ import Models.User as UM
 -- | Context with user for protected actions
 type AppContext m = StateT User (AppConfig m)
 
--- | Application configuration
+-- | Application configuration monad
 type AppConfig m = ReaderT Config m
 
+-- | Application configuration
 data Config = Config { 
       dbFile         :: String, -- | Path to the sqlite database file
       initFile       :: String, -- | Path to the file containing create table statement

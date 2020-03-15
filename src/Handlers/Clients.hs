@@ -1,5 +1,8 @@
-module Handlers where
+module Handlers.Clients where
 
+import Servant
+
+type NotificationToken = String
 type ClientsAPI = "clients" :> (
-        Post '[JSON] NoContent
-    ) 
+         "add" :> ReqBody '[PlainText] NotificationToken :> Post '[JSON] NoContent
+    :<|> "remove" :> ReqBody '[PlainText] Int :> Post '[JSON] NoContent) 

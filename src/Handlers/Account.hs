@@ -48,7 +48,7 @@ login form = trace "account/login" $ do
         Nothing -> throwError err401 -- return $ LM.LoginResponse { loginSuccess = False, redirectTo = ""}
 
 
-
+-- | Return a login succes with the correct Set-Cookie headers
 returnLoginSuccess :: User -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 returnLoginSuccess user = do 
   conf <- ask
