@@ -3,50 +3,18 @@
 <script type="text/javascript" src="scripts/jquery.3.4.1.js"></script>
 <script type="text/javascript" src="scripts/xsrf.js"></script>
 <script type="text/javascript" src="scripts/utils.js"></script>
+
 <head>
 </head>
+
 <body>
     <div class=Content>
         <h1>Account</h1>
         Hallo hanno!
-        <button class=float-right onclick="logOut()">Logout</button>
+        <button class=pull-right onclick="logOut()">Logout</button>
         <h2>Targets</h2>
-        <table>
-            <tbody>
-                <tr>
-                    <th>URL</th>
-                    <th>Selector</th>
-                    <th>Last update</th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <td>uu.afp.nl</td>
-                    <td>-</td>
-                    <td>14:00, 22-02-2020</td>
-                    <td class=align-right>
-                        <img class="fa ml5 blue" src=img/edit.svg></img>
-                        <img class="fa red" src=img/trash-alt.svg></img>
-                    </td>
-                </tr>
-                <tr>
-                    <td>uu.bd.nl</td>
-                    <td>.tests > .content</td>
-                    <td>14:00, 22-02-2020</td>
-                    <td class=align-right>
-                        <img class="fa ml5 blue" src=img/edit.svg></img>
-                        <img class="fa red" src=img/trash-alt.svg></img>
-                    </td>
-                </tr>
-                <tr>
-                    <td>uu.cpd.nl</td>
-                    <td>-</td>
-                    <td>14:00, 22-02-2020</td>
-                    <td class=align-right>
-                        <img class="fa ml5 blue" src=img/edit.svg></img>
-                        <img class="fa red" src=img/trash-alt.svg></img>
-                    </td>
-                </tr>
-            </tbody>
+        <div id=TargetError class="ErrorMsg NoDisplay mt10"></div>
+        <table id=Targets>
         </table>
 
         <h2>Clients</h2>
@@ -54,12 +22,70 @@
 
     <script>
         $(() => setTimeout(() => {
+            bindTargetList();
+        }, 1));
+
+        // Get the targets list for this user from the server
+        var deleteAndEditBtn = '<td class=align-right>'
+            + '<img onclick="editTarget($(this).parent().parent())" class="fa blue" src=img/edit.svg></img>'
+            + '<img onclick="deleteTarget($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
+            + '</td>'
+        function bindTargetList() {
+            getList('target/list', '#Targets', 'targetID', [
+                { name: "URL", field: "websiteUrl", editable: true },
+                { name: "Selector", field: "selector", editable: true },
+                { name: "Last Update", field: "lastUpdate", templater: toDate },
+                { name: "", template: deleteAndEditBtn },
+            ], true);
+        }
+
+        function editTarget(target) {
+            var targetId = target.data("val");
+        }
+
+        function updateTarget(targetModel) {
             $.ajax({
                 method: "GET",
-                url: "/secure"
+                url: "/target/update",
+                data: targetModel,
+                success: (result) => {
+                    if (result) {
+                        bindTargetList();
+                        $("#TargetError").hide();
+                    } else {
+                        $("#TargetError").html("Kon target niet verwijderen.");
+                        $("#TargetError").show();
+                    }
+                },
+                error: (err) => {
+                    $("#TargetError").html("Kon target niet verwijderen.");
+                    $("#TargetError").show();
+                }
             });
-            console.log('YAY');
-        },500));
+        }
+
+        function deleteTarget(target) {
+            var targetId = target.data("val");
+            $.ajax({
+                method: "GET",
+                url: "/target/delete",
+                data: { id: targetId },
+                success: (result) => {
+                    if (result) {
+                        bindTargetList();
+                        $("#TargetError").hide();
+                    } else {
+                        $("#TargetError").html("Kon target niet verwijderen.");
+                        $("#TargetError").show();
+                    }
+                },
+                error: (err) => {
+                    $("#TargetError").html("Kon target niet verwijderen.");
+                    $("#TargetError").show();
+                }
+            });
+        }
     </script>
 </body>
+
 </html>

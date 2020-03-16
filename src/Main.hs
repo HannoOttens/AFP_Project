@@ -22,14 +22,16 @@ type PublicAPI = LoginAPI
 type ProtectedAPI = TargetsAPI
 type RawFiles = Raw
 type API = PublicAPI  
-            :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI
+            :<|> Servant.Auth.Server.Auth '[Cookie] User :> (TargetsAPI)
             :<|> RawFiles
 
 rawFiles :: ServerT RawFiles (AppConfig Handler)
 rawFiles = serveDirectoryWebApp "www"
 
 protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)
-protected (Servant.Auth.Server.Authenticated user) = evalStateT targetServer user
+protected (Servant.Auth.Server.Authenticated user) = 
+      let protectedAPI = (Proxy :: Proxy ProtectedAPI)      
+      in hoistServer protectedAPI (`evalStateT` user) targetServer 
 protected _ = throwAll err401
 
 public:: ServerT PublicAPI (AppConfig Handler)

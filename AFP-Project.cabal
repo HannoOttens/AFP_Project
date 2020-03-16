@@ -30,6 +30,7 @@ library
     , Models.User
     , Models.Target
     , Models.Notification
+    , Models.FullTarget
     , Handlers.Account
     , Scraper
     , Notification
@@ -70,6 +71,7 @@ executable AFP-Project
                      , Models.Website
                      , Models.User
                      , Models.Target
+                     , Models.FullTarget
                      , Models.Notification
                      , Handlers.Account
                      , Handlers.Targets

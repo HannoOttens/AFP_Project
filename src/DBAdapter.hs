@@ -12,6 +12,7 @@ import Data.List.Split
 import qualified Models.Website as WM
 import qualified Models.User as UM
 import qualified Models.Target as TM
+import qualified Models.FullTarget as FTM
 import Config
 
 -- | Initialize database with tables if do not already exist
@@ -28,6 +29,9 @@ splitQuery = map fromString . splitOn ";"
 execDB :: (Connection -> IO a) -> IO a
 execDB f = do conf <- config
               runReaderT (exec f) conf
+
+contextDbAction :: (Connection -> IO a) -> AppContext Handler a
+contextDbAction = lift . liftDbAction
 
 liftDbAction :: (Connection -> IO a) -> AppConfig Handler a
 liftDbAction = mapReaderT liftIO . exec
@@ -150,11 +154,23 @@ removeTarget targetID conn = do execute conn deleteTarget (Only targetID)
                                 isSuccessful conn
   where deleteTarget = "DELETE FROM Targets WHERE TargetID = ?" 
 
+-- | Get specific target
+getTarget :: Int -> Connection -> IO (Maybe TM.Target)
+getTarget targetId conn = do
+    result <- query conn lookupTarget (Only targetId)
+    return $ listToMaybe result
+  where lookupTarget = "SELECT TargetID, UserID, WebsiteID, Selector, Hash "
+                    <> "FROM Targets "
+                    <> "WHERE TargetID = ?"
+
 -- | Get all targets of given user 
-getTargetsOfUser :: Int -> Connection -> IO [TM.Target]
+getTargetsOfUser :: Int -> Connection -> IO [FTM.FullTarget]
 getTargetsOfUser userID conn = 
     query conn lookupTargets (Only userID)
-  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector, Hash FROM Targets WHERE UserID = ?"
+  where lookupTargets = "SELECT T.TargetID, T.UserID, T.WebsiteID, W.URL, W.LastUpdate, T.Selector "
+                     <> "FROM Targets AS T "
+                     <> "JOIN Websites AS W ON T.WebsiteID = W.WebsiteID "
+                     <> "WHERE UserID = ?"
 
 -- | Checks if there are websites in the database that are not targeted, so they can be removed
 removeUnusedWebsites :: Connection -> IO Int
