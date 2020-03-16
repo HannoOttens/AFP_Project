@@ -44,11 +44,11 @@ login form = trace "account/login" $ do
     case user of
         Just u  -> if UM.password u == LM.password form
                    then returnLoginSuccess u
-                   else throwError err401 -- return $ LM.LoginResponse { loginSuccess = False, redirectTo = ""}
-        Nothing -> throwError err401 -- return $ LM.LoginResponse { loginSuccess = False, redirectTo = ""}
+                   else throwError err401
+        Nothing -> throwError err401
 
 
-
+-- | Return a login succes with the correct Set-Cookie headers
 returnLoginSuccess :: User -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 returnLoginSuccess user = do 
   conf <- ask

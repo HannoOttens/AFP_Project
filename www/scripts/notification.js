@@ -17,7 +17,10 @@ function subscribe() {
     .then(getPublicKey)
     .then(subscribeUser)
     .then(postSubscription)
-    .then(() => alert("Successfully subscribed!"))
+    .then(function (response) {
+        if (response.success) alert("Successfully subscribed!");
+        else throw new Error("Subscription failed");
+    })
     .catch(err => alert(err));
 }
 

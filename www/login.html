@@ -26,8 +26,8 @@
 
     <script>
         $(() => {
+            // Set the login form to post and not redirect, set cookie with result.
             $("#loginForm").submit(function (event) {
-                console.log('EE!');
                 event.preventDefault();
                 /* get the action attribute from the <form action=""> element */
                 var $form = $(this),
@@ -39,7 +39,6 @@
                     url: 'login',
                     data: formData,
                     success: function (resp, textStatus, XMLHttpRequest) {
-
                         if (resp && resp.loginSuccess) {
                             setXSRF();
                             window.location.href = resp.redirectTo;
