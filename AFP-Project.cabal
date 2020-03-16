@@ -35,6 +35,8 @@ library
     , Models.Target
     , Models.Notification
     , Handlers.Account
+    , Handlers.Clients
+    , Handlers.Targets
     , Scraper
     , Notification
   hs-source-dirs:
@@ -61,6 +63,7 @@ library
     , web-push
     , lens
     , http-client
+    , http-client-tls
   default-language: Haskell2010
 
 executable AFP-Project
@@ -78,6 +81,8 @@ executable AFP-Project
                      , Models.Notification
                      , Handlers.Account
                      , Handlers.Targets
+                     , Handlers.Clients
+                     , Handlers.Notification
                      , Scraper
                      , Notification
   default-language:    Haskell2010
@@ -111,6 +116,7 @@ executable AFP-Project
     , web-push
     , lens
     , http-client
+    , http-client-tls
 
 test-suite test
   default-language: Haskell2010

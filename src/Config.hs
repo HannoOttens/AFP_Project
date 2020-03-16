@@ -1,10 +1,12 @@
 module Config where
-import Data.Text
+import qualified Data.Text as T
 import Control.Monad.Trans.Reader(ReaderT)
 import Control.Monad.Trans.State(StateT)
 import Servant
 import Servant.Auth.Server
 import Web.WebPush
+import Network.HTTP.Client
+import Network.HTTP.Client.TLS
 
 import Models.User as UM
 
@@ -17,11 +19,12 @@ type AppConfig m = ReaderT Config m
 data Config = Config { 
       dbFile         :: String, -- | Path to the sqlite database file
       initFile       :: String, -- | Path to the file containing create table statement
-      pollSchedule   :: Text,   -- | CRON-schedule for polling the websites
+      pollSchedule   :: T.Text,   -- | CRON-schedule for polling the websites
       cookieSettings :: CookieSettings, -- | Settings for cookies
       jwtSettings    :: JWTSettings,    -- | Settings for JWT
       authConf       :: Context '[CookieSettings, JWTSettings], -- | Combined settings for JWT and cookies
-      vapidKeys      :: VAPIDKeysMinDetails -- | representing a unique VAPID key pair for push notifications
+      vapidKeys      :: VAPIDKeys, -- | representing a unique VAPID key pair for push notifications
+      manager        :: Manager -- | Network connection manager, shared manager between request
 }
 
 -- | Read/construct config
@@ -29,9 +32,12 @@ config :: IO Config
 config = 
       do 
       jwtKey <- generateKey
-      let cookieSets = defaultCookieSettings { cookieIsSecure  = NotSecure }
+      vapidDetails <- readVapidDetails
+      connManager <- newManager tlsManagerSettings
+      let cookieSets = defaultCookieSettings { cookieIsSecure  = NotSecure, cookieXsrfSetting = Just xcrf }
+          xcrf = def { xsrfExcludeGet = True }
           jwtSets = defaultJWTSettings jwtKey
-      vapidDetails <- generateVAPIDKeys
+          vapidKeyPair = readVAPIDKeys vapidDetails
       return $ Config {
             dbFile = "db",
             initFile = "tables.sqlite",
@@ -39,5 +45,12 @@ config =
             authConf = (cookieSets :. jwtSets :. EmptyContext),
             cookieSettings = cookieSets,
             jwtSettings = jwtSets,
-            vapidKeys = vapidDetails
+            vapidKeys = vapidKeyPair,
+            manager = connManager
       }
+
+readVapidDetails :: IO VAPIDKeysMinDetails
+readVapidDetails = do
+      file <- readFile "vapid.txt"
+      let [private, x, y] = map read $ lines file
+      return $ VAPIDKeysMinDetails private x y 

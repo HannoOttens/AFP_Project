@@ -12,6 +12,7 @@ import Data.List.Split
 import qualified Models.Website as WM
 import qualified Models.User as UM
 import qualified Models.Target as TM
+import qualified Models.Notification as NM
 import Config
 
 -- | Initialize database with tables if do not already exist
@@ -116,15 +117,15 @@ getUser name conn = do
   where lookupUser = "SELECT UserID, Username, Password FROM Users WHERE Username = ?"
 
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
-addToken :: UM.User -> (String, String, String) -> Connection -> IO Bool
-addToken user (endpoint, hash, auth) conn = do
-    execute conn insertToken (UM.id user, endpoint, hash, auth)
+addToken :: UM.User -> NM.SubscriptionDetails -> Connection -> IO Bool
+addToken user sub conn = do
+    execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub)
     isSuccessful conn
   where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth) VALUES (?, ?, ?, ?)"
 
-getTokens :: Int -> Connection -> IO [(String,String,String)]
+getTokens :: Int -> Connection -> IO [NM.SubscriptionDetails]
 getTokens userID conn = query conn lookupTokens (Only userID)
-  where lookupTokens = "SELECT (Endpoint, P256dh, Auth) FROM NotificationTokens WHERE UserID = ?"
+  where lookupTokens = "SELECT Endpoint, P256dh, Auth FROM NotificationTokens WHERE UserID = ?"
 
 -- | Get all users and selectors which are subscribed on given website
 getTargetsOnWebsite :: Int -> Connection -> IO [TM.Target]

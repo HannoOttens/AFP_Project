@@ -12,6 +12,7 @@ import qualified Data.Hashable as H
 import qualified DBAdapter as DB
 import Handlers.Account
 import Handlers.Targets
+import Handlers.Notification
 import Config
 import Scraper
 import Models.Website
@@ -19,7 +20,8 @@ import Models.User
 import Models.Target
 
 type PublicAPI = LoginAPI 
-type ProtectedAPI = TargetsAPI
+type ProtectedAPI = TargetsAPI 
+               :<|> "notification" :> NotificationAPI
 type RawFiles = Raw
 type API = PublicAPI  
             :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI
@@ -28,8 +30,8 @@ type API = PublicAPI
 rawFiles :: ServerT RawFiles (AppConfig Handler)
 rawFiles = serveDirectoryWebApp "www"
 
-protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)
-protected (Servant.Auth.Server.Authenticated user) = evalStateT targetServer user
+protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)    
+protected (Servant.Auth.Server.Authenticated user) = hoistServer protectedAPI (`evalStateT` user) (targetServer :<|> notificationServer)
 protected _ = throwAll err401
 
 public:: ServerT PublicAPI (AppConfig Handler)
@@ -42,6 +44,9 @@ server = public
 
 api :: Proxy API 
 api = Proxy
+
+protectedAPI :: Proxy ProtectedAPI
+protectedAPI = Proxy 
 
 runApp :: Config -> IO ()
 runApp conf = do

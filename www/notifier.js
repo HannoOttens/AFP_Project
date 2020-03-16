@@ -1,16 +1,11 @@
 // https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications
 // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API/Using_the_Notifications_API
 self.addEventListener('push', function(e) {
-    var body;
-    if (e.data) {
-      body = e.data.text();
-    } else {
-      body = 'Push message no payload';
-    }
+    var data = e.data.json();
   
     var options = {
-      body: body,
-      icon: 'images/notification-flat.png',
+      body: data.body,
+      icon: data.icon,
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
@@ -23,8 +18,9 @@ self.addEventListener('push', function(e) {
           icon: 'images/xmark.png'},
       ]
     };
+
     e.waitUntil(
-      self.registration.showNotification('Push Notification', options)
+      self.registration.showNotification(data.title, options)
     );
   });
   

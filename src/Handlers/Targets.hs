@@ -4,7 +4,6 @@ module Handlers.Targets (
 
 import Servant
 import Debug.Trace
-import Control.Monad.Reader
 import Control.Monad.State
 
 
@@ -19,3 +18,4 @@ secure :: AppContext Handler NoContent
 secure = do
     user <- get
     trace (show user) $ return NoContent
+                       
