@@ -5,11 +5,11 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Data.Word (Word8)
 import Web.WebPush
+import Debug.Trace
 
 
 import Config
 import Models.Notification
-import Notification
 import qualified DBAdapter as DB 
 
 type NotificationAPI = "subscribe" :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
@@ -19,12 +19,14 @@ notificationServer :: ServerT NotificationAPI (AppContext Handler)
 notificationServer = subscribe
                 :<|> keys
 
+-- | Store subscription details of user
 subscribe :: SubscriptionDetails -> AppContext Handler Response
 subscribe details = do user <- get
                        result <- lift $ DB.liftDbAction $ DB.addToken user details
-                       return $ Response result
+                       trace "notification/subscribe" $ return $ Response result
 
+-- | Get public key of server for notification subscription
 keys :: AppContext Handler [Word8]
 keys = do keyPair <- asks vapidKeys
           let publicKey = vapidPublicKeyBytes keyPair
-          return publicKey
+          trace "notification/keys" $ return publicKey
