@@ -22,7 +22,8 @@ library
     , DeriveGeneric
     , FlexibleContexts
   exposed-modules:
-      DBAdapter
+      App
+    , DBAdapter
     , Config
     , Scraper
     , Notification
@@ -69,8 +70,9 @@ executable AFP-Project
   main-is:             Main.hs
   hs-source-dirs:      src
   default-language:    Haskell2010
-  other-modules:       
-      DBAdapter
+  other-modules:      
+      App 
+    , DBAdapter
     , Config
     , Scraper
     , Notification
