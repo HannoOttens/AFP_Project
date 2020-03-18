@@ -126,6 +126,11 @@ test-suite test
   type: exitcode-stdio-1.0
   hs-source-dirs: tests
   main-is: Test.hs
+  other-modules:
+        TestUtils
+      , AccountTest
+  default-extensions:
+        OverloadedStrings     
   build-depends:
         base >= 4 && < 5
       , AFP-Project 
@@ -133,3 +138,11 @@ test-suite test
       , tasty
       , tasty-quickcheck
       , sqlite-simple
+      , hspec
+      , hspec-wai
+      , bytestring
+      , http-types
+      , wai
+      , wai-extra
+      , http-api-data
+      , aeson
