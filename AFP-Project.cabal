@@ -7,7 +7,7 @@ synopsis:            A website change notifier
 description:         A website change notifier
 license:             MIT
 license-file:        LICENSE
-author:              Hanno Ottens (5980933), Luuk (???), Marco (???)
+author:              Hanno Ottens (5980933), Luuk Glorie (5972868), Marco van de Weerthof (5871476)
 category:            web-scraper
 build-type:          Simple
 extra-source-files:  CHANGELOG.md
