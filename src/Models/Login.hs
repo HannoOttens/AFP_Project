@@ -11,7 +11,6 @@ data LoginForm = LoginForm
  } deriving (Eq, Show, Generic)
 instance FromForm LoginForm
 
-
 -- | Response after logging in
 data LoginResponse = LoginResponse 
  { loginSuccess :: Bool

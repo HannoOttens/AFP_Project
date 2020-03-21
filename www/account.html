@@ -4,6 +4,7 @@
 <script type="text/javascript" src="scripts/xsrf.js"></script>
 <script type="text/javascript" src="scripts/utils.js"></script>
 <script type="text/javascript" src="scripts/notification.js"></script>
+
 <head>
 </head>
 
@@ -28,7 +29,7 @@
 
         // Get the targets list for this user from the server
         var deleteAndEditBtn = '<td class=align-right>'
-            + '<img onclick="editTarget($(this).parent().parent())" class="fa blue" src=img/edit.svg></img>'
+            + '<img onclick="inlineEdit($(this).parent().parent(), updateTarget, \'targetID\')" class="fa blue" src=img/edit.svg></img>'
             + '<img onclick="deleteTarget($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
             + '</td>'
         function bindTargetList() {
@@ -37,32 +38,29 @@
                 { name: "Selector", field: "selector", editable: true },
                 { name: "Last Update", field: "lastUpdate", templater: toDate },
                 { name: "", template: deleteAndEditBtn },
-            ], true);
-        }
-
-        function editTarget(target) {
-            var targetId = target.data("val");
+            ], updateTarget);
         }
 
         function updateTarget(targetModel) {
+            console.log(targetModel);
             $.ajax({
-                method: "GET",
+                method: "POST",
                 url: "/target/update",
                 data: targetModel,
                 success: (result) => {
                     if (result) {
                         bindTargetList();
                         $("#TargetError").hide();
-                    } else {
-                        $("#TargetError").html("Kon target niet verwijderen.");
-                        $("#TargetError").show();
-                    }
+                    } else 
+                        targetError("Kon target niet updaten.");
                 },
-                error: (err) => {
-                    $("#TargetError").html("Kon target niet verwijderen.");
-                    $("#TargetError").show();
-                }
+                error: (err) => targetError("Kon target niet updaten.")
             });
+        }
+
+        function targetError(err) {
+            $("#TargetError").html(err);
+            $("#TargetError").show();
         }
 
         function deleteTarget(target) {
@@ -75,15 +73,10 @@
                     if (result) {
                         bindTargetList();
                         $("#TargetError").hide();
-                    } else {
-                        $("#TargetError").html("Kon target niet verwijderen.");
-                        $("#TargetError").show();
-                    }
+                    } else
+                        targetError("Kon target niet verwijderen.");
                 },
-                error: (err) => {
-                    $("#TargetError").html("Kon target niet verwijderen.");
-                    $("#TargetError").show();
-                }
+                error: (err) => targetError("Kon target niet verwijderen."),
             });
         }
     </script>

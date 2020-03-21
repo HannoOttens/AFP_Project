@@ -13,7 +13,7 @@ function logOut() {
  *      - field: Field to get the data from
  *      - templater: Function to construct HTML from the data field
  *      - tempalte: Static template for the column
- * @param {boolean} editable - If the grid should add a editable row
+ * @param {Function} editable - Function to send the grid data to
  *  */
 function getList(url, target, idField, columns, editable) {
     $.ajax({
@@ -37,7 +37,10 @@ function getList(url, target, idField, columns, editable) {
                     if (hd.field) {
                         let val = itm[hd.field];
                         if (hd.templater) val = hd.templater(val);
-                        html += '<td>' + val + '</td>';
+                        html += '<td data-value="' + val 
+                              + '" data-field="' + hd.field
+                              + '" data-editable="' + !!hd.editable
+                              + '">' + val + '</td>';
                     }
                     else if (hd.template)
                         html += '<td>' + hd.template + '</td>';
@@ -47,23 +50,53 @@ function getList(url, target, idField, columns, editable) {
 
             // Insert editable row if editable
             if (editable) {
-                console.log(editable);
                 // Insert headers
-                html += '<tr><form id=newTargetForm></form>'; // TODO: Make generic
+                html += '<tr><form id=editForm></form>'; // TODO: Make generic
                 columns.forEach((hd) => {
                     html += '<td>'
                     if (hd.editable) {
-                        html += '<input form=newTargetForm name="' + hd.field + '" />'
+                        html += '<input form=editForm name="' + hd.field + '" />'
                     }
                     html += '</td>';
                 })
-                html += '<td><button type=submit>Add target</button></td>'
+                html += '<td><button form=editForm type=submit>Add target</button></td>'
                 html += '</tr>'
             }
 
             // Set new html
             $(target).html(html);
+
+            $("#editForm").submit(function (event) {
+                event.preventDefault();
+                var formData = $(this).serialize();
+                formData += "&" + idField + "=0" 
+                editable(formData);
+            });
         }
+    });
+}
+
+function inlineEdit(row, callback, idField) {
+    let html = '<form id=inlineEditForm></form>'
+    $(row).children().each((idx, item) => {
+        let $item = $(item);
+        let editable = $item.data("editable"); 
+        let value = $item.data("value"); 
+        let field = $item.data("field"); 
+
+        if(editable)
+            html += '<td><input form=inlineEditForm name="' + field + '" value="' + value + '" /></td>'
+    });
+    html += '<td><button form=inlineEditForm type=submit>Update</button></td>'
+
+    // Replace with inline edit
+    $(row).html(html);
+
+    $("#inlineEditForm").submit(function (event) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        formData += "&" + idField + "=" + $(row).data("val"); 
+        callback(formData);
     });
 }
 

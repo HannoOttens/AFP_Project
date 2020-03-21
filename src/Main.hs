@@ -2,7 +2,6 @@
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.Auth.Server
-import Servant.Auth.Server.SetCookieOrphan ()
 import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.State
@@ -31,7 +30,10 @@ rawFiles :: ServerT RawFiles (AppConfig Handler)
 rawFiles = serveDirectoryWebApp "www"
 
 protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)    
-protected (Servant.Auth.Server.Authenticated user) = hoistServer protectedAPI (`evalStateT` user) (targetServer :<|> notificationServer)
+protected (Servant.Auth.Server.Authenticated user) = 
+      hoistServer protectedAPI 
+                  (`evalStateT` user) 
+                  (targetServer :<|> notificationServer)
 protected _ = throwAll err401
 
 public:: ServerT PublicAPI (AppConfig Handler)

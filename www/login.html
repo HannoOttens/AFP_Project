@@ -5,6 +5,7 @@
 
 <head>
 </head>
+
 <body>
     <div class=center>
         <div class=login>
@@ -34,7 +35,7 @@
                     url = $form.attr('action');
                 /* Send the data using post with element id name and name2*/
                 var formData = $("#loginForm").serialize();
-                posting = $.ajax({
+                $.ajax({
                     type: 'POST',
                     url: 'login',
                     data: formData,
@@ -54,4 +55,5 @@
         });
     </script>
 </body>
+
 </html>

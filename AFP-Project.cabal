@@ -82,6 +82,7 @@ executable AFP-Project
     , Models.User
     , Models.Target
     , Models.FullTarget
+    , Models.EditTarget
     , Models.Notification
     -- Handlers
     , Handlers.Account
