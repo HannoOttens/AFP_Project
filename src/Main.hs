@@ -5,6 +5,7 @@ import Control.Monad.Reader
 import App
 import qualified DBAdapter as DB
 import Config
+import Poll
 
 main :: IO ()
 main = do

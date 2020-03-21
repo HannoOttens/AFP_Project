@@ -27,6 +27,7 @@ library
       App
     , DBAdapter
     , Config
+    , Poll
     , Scraper
     , Notification
     , PostRedirect
@@ -76,6 +77,7 @@ executable AFP-Project
       App 
     , DBAdapter
     , Config
+    , Poll
     , Scraper
     , Notification
     , PostRedirect
