@@ -20,7 +20,7 @@ import Models.Target
 
 type PublicAPI = LoginAPI 
 type ProtectedAPI = TargetsAPI 
-               :<|> "notification" :> NotificationAPI
+               :<|> NotificationAPI
 type RawFiles = Raw
 type API = PublicAPI  
             :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI

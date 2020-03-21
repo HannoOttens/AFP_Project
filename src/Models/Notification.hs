@@ -18,19 +18,21 @@ instance A.ToJSON NotificationMessage
 data SubscriptionDetails = SubscriptionDetails {
     endpoint :: Text,
     hash     :: Text,
-    auth     :: Text
+    auth     :: Text,
+    device   :: Text,
+    browser  :: Text
 } deriving (Generic)
 
 instance FromForm SubscriptionDetails
+instance A.ToJSON SubscriptionDetails
+instance FromRow SubscriptionDetails where
+    fromRow = SubscriptionDetails <$> field <*> field <*> field <*> field <*> field
 
 data Response = Response { 
     success :: Bool 
  } deriving (Eq, Show, Generic)
 
 instance A.ToJSON Response  
-
-instance FromRow SubscriptionDetails where
-    fromRow = SubscriptionDetails <$> field <*> field <*> field
 
 newNotification :: String -> String -> NotificationMessage
 newNotification t b = NotificationMessage {

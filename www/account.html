@@ -12,19 +12,26 @@
     <div class=Content>
         <h1>Account</h1>
         Hallo hanno!
-        <button class=float-right onclick="subscribe()">Subscribe to notifications</button>
         <button class=pull-right onclick="logOut()">Logout</button>
+        <button id=Subscribe class="pull-right mr10" onclick="subscribe()">Subscribe to notifications</button>
         <h2>Targets</h2>
         <div id=TargetError class="ErrorMsg NoDisplay mt10"></div>
         <table id=Targets>
         </table>
 
         <h2>Clients</h2>
+        <table id=Clients>
+        </table>
     </div>
 
     <script>
         $(() => setTimeout(() => {
             bindTargetList();
+            bindClientList();
+            
+            // Hide subscribe if already granted
+            // if(Notification.permission == 'granted') 
+                // $("#Subscribe").hide();
         }, 1));
 
         // Get the targets list for this user from the server
@@ -40,6 +47,14 @@
                 { name: "", template: deleteAndEditBtn },
             ], updateTarget);
         }
+        function bindClientList() {
+            getList('notification/clients', '#Clients', 'P256dh', [
+                { name: "Device", field: "device" },
+                { name: "Browser", field: "browser" },
+                { name: "Token", field: "auth" },
+            ]);
+        }
+
 
         function updateTarget(targetModel) {
             console.log(targetModel);

@@ -9,24 +9,37 @@ import Debug.Trace
 
 
 import Config
-import Models.Notification
+import Models.Notification as MN
+import Models.User as UM
 import qualified DBAdapter as DB 
 
-type NotificationAPI = "subscribe" :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
-                  :<|> "keys" :> Get '[JSON] [Word8]
+type NotificationAPI = "notification" :> (
+         "subscribe" :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
+    :<|> "keys"                                                       :> Get  '[JSON] [Word8]
+    :<|> "clients"                                                    :> Get  '[JSON] [SubscriptionDetails])
 
 notificationServer :: ServerT NotificationAPI (AppContext Handler)
 notificationServer = subscribe
                 :<|> keys
+                :<|> clients
 
 -- | Store subscription details of user
 subscribe :: SubscriptionDetails -> AppContext Handler Response
-subscribe details = do user <- get
-                       result <- lift $ DB.liftDbAction $ DB.addToken user details
-                       trace "notification/subscribe" $ return $ Response result
+subscribe details = trace "notification/subscribe" $ do 
+    user <- get
+    result <- lift $ DB.liftDbAction $ DB.addToken user details
+    return $ Response result
 
 -- | Get public key of server for notification subscription
 keys :: AppContext Handler [Word8]
-keys = do keyPair <- asks vapidKeys
-          let publicKey = vapidPublicKeyBytes keyPair
-          trace "notification/keys" $ return publicKey
+keys = trace "notification/keys" $ do 
+    keyPair <- asks vapidKeys
+    let publicKey = vapidPublicKeyBytes keyPair
+    return publicKey
+
+-- | Get public key of server for notification subscription
+clients :: AppContext Handler [SubscriptionDetails]
+clients = trace "notification/clients" $ do 
+    userId <- gets UM.id
+    clients <- DB.contextDbAction $ DB.getTokens userId
+    return clients

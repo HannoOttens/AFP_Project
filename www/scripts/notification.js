@@ -88,8 +88,42 @@ function subscribeUser(pubKey) {
         details = {  
             endpoint: pushSubscription.endpoint, 
             hash: pushSubscription.toJSON().keys.p256dh, 
-            auth: pushSubscription.toJSON().keys.auth
+            auth: pushSubscription.toJSON().keys.auth,
+            device: detectDevice(),
+            browser: detectBrowser()
         };
         return details;
     });
+}
+
+
+function detectBrowser() {
+    let userAgent = navigator.userAgent;
+    // The order of these IFs is important!
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
+    if (userAgent.indexOf("Seamonkey/") > 0)
+        return "Seamonkey";
+    if (userAgent.indexOf("Firefox/") > 0)
+        return "Firefox";
+    if (userAgent.indexOf("Safari/") > 0)
+        return "Safari";
+    if (userAgent.indexOf("Chromium/") > 0)
+        return "Chromium";
+    if (userAgent.indexOf("Chrome/") > 0)
+        return "Chrome";
+    if (userAgent.indexOf("OPR/") > 0
+        || userAgent.indexOf("Opera/") > 0)
+        return "Opera";
+    if (userAgent.indexOf("; MSIE ") > 0
+        || userAgent.indexOf("Trident/7.0; .*rv:") > 0)
+        return "Internet Explorer";
+    return "Unkown browser";
+}
+
+function detectDevice() {
+    let userAgent = navigator.userAgent;
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent
+    if (userAgent.indexOf("Mobi") > 0)
+        return "Mobile device";
+    return "Computer";
 }

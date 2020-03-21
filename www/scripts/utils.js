@@ -20,6 +20,7 @@ function getList(url, target, idField, columns, editable) {
         method: "GET",
         url: url,
         success: (result) => {
+            console.log(result);
             // Remove old
             $(target).empty();
 
@@ -37,10 +38,10 @@ function getList(url, target, idField, columns, editable) {
                     if (hd.field) {
                         let val = itm[hd.field];
                         if (hd.templater) val = hd.templater(val);
-                        html += '<td data-value="' + val 
-                              + '" data-field="' + hd.field
-                              + '" data-editable="' + !!hd.editable
-                              + '">' + val + '</td>';
+                        html += '<td data-value="' + val
+                            + '" data-field="' + hd.field
+                            + '" data-editable="' + !!hd.editable
+                            + '">' + val + '</td>';
                     }
                     else if (hd.template)
                         html += '<td>' + hd.template + '</td>';
@@ -69,7 +70,7 @@ function getList(url, target, idField, columns, editable) {
             $("#editForm").submit(function (event) {
                 event.preventDefault();
                 var formData = $(this).serialize();
-                formData += "&" + idField + "=0" 
+                formData += "&" + idField + "=0"
                 editable(formData);
             });
         }
@@ -80,11 +81,11 @@ function inlineEdit(row, callback, idField) {
     let html = '<form id=inlineEditForm></form>'
     $(row).children().each((idx, item) => {
         let $item = $(item);
-        let editable = $item.data("editable"); 
-        let value = $item.data("value"); 
-        let field = $item.data("field"); 
+        let editable = $item.data("editable");
+        let value = $item.data("value");
+        let field = $item.data("field");
 
-        if(editable)
+        if (editable)
             html += '<td><input form=inlineEditForm name="' + field + '" value="' + value + '" /></td>'
     });
     html += '<td><button form=inlineEditForm type=submit>Update</button></td>'
@@ -95,7 +96,7 @@ function inlineEdit(row, callback, idField) {
     $("#inlineEditForm").submit(function (event) {
         event.preventDefault();
         var formData = $(this).serialize();
-        formData += "&" + idField + "=" + $(row).data("val"); 
+        formData += "&" + idField + "=" + $(row).data("val");
         callback(formData);
     });
 }
@@ -105,3 +106,4 @@ function toDate(intDate) {
     var dateStr = (new Date(intDate)).toISOString()
     return dateStr.substring(11, 16) + ", " + dateStr.substring(0, 10);
 }
+

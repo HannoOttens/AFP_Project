@@ -140,14 +140,14 @@ getUser name conn = do
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
 addToken :: UM.User -> NM.SubscriptionDetails -> Connection -> IO Bool
 addToken user sub conn = do
-    execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub)
+    execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
     isSuccessful conn
-  where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth) "
-                   <> "VALUES (?, ?, ?, ?)"
+  where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth, Device, Browser) "
+                   <> "VALUES (?, ?, ?, ?, ?, ?)"
 
 getTokens :: Int -> Connection -> IO [NM.SubscriptionDetails]
 getTokens userID conn = query conn lookupTokens (Only userID)
-  where lookupTokens = "SELECT Endpoint, P256dh, Auth "
+  where lookupTokens = "SELECT Endpoint, P256dh, Auth, Device, Browser "
                     <> "FROM NotificationTokens "
                     <> "WHERE UserID = ?"
 

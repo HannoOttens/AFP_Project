@@ -11,6 +11,8 @@ Create Table If Not Exists NotificationTokens (
 	Endpoint Text Not Null,
 	P256dh Text Not Null,
 	Auth Text Not Null,
+	Device Text Not Null,
+	Browser Text Not Null,
 	Foreign Key (UserID) References Users (UserID)
 );
 
