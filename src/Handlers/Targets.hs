@@ -10,24 +10,40 @@ import Control.Monad.State
 
 import Models.Target as TM
 import Models.FullTarget as FTM
+import Models.EditTarget as ETM
+import Models.Website as WM
 import Models.User as UM
 import Config
 import qualified DBAdapter as DB
 
-type TargetID = Int
 type TargetsAPI = "target" :> (
-             "update" :> ReqBody '[JSON] FullTarget :> Get '[JSON] TargetID
-        :<|> "delete" :> QueryParam "id" Int        :> Get '[JSON] Bool
-        :<|> "list"                                 :> Get '[JSON] [FTM.FullTarget]
+             "delete" :> QueryParam "id" Int                  :> Get '[JSON] Bool
+        :<|> "update" :> ReqBody '[FormUrlEncoded] EditTarget :> Post '[JSON] Bool
+        :<|> "list"                                           :> Get '[JSON] [FTM.FullTarget]
     )
 
 targetServer :: ServerT TargetsAPI (AppContext Handler)
-targetServer = editTarget :<|> deleteTarget :<|> listTargets
+targetServer =  deleteTarget :<|> editTarget :<|> listTargets
 
-editTarget :: FullTarget -> AppContext Handler Int
-editTarget ft = do
-    user <- get
-    trace (show user) $ return (FTM.targetID ft)
+editTarget :: ETM.EditTarget -> AppContext Handler Bool
+editTarget targetModel = trace "target/update" $ do
+    -- Insert the website (if it does not exist) and get the ID
+    let website = WM.Website { WM.url = ETM.websiteUrl targetModel
+                             , WM.idWebsite = 0
+                             , WM.lastUpdate = Nothing
+                             , WM.hash = Nothing }
+    websiteId <- DB.contextDbAction $ DB.addWebsite website
+    -- Make the target
+    userId <- gets UM.id
+    let target = TM.Target { TM.id = ETM.targetID targetModel
+                           , TM.userID = userId
+                           , TM.websiteID = websiteId
+                           , TM.selector = ETM.selector targetModel
+                           , TM.hash = Nothing }
+    -- Insert or update depending on the posted ID
+    case ETM.targetID targetModel of
+        0 -> DB.contextDbAction $ DB.addTarget target
+        _ -> DB.contextDbAction $ DB.editTarget target
 
 deleteTarget :: Maybe Int -> AppContext Handler Bool
 deleteTarget targetIdQ = trace "target/delete" $ do

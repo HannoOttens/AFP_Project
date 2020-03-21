@@ -21,6 +21,8 @@ library
     , OverloadedStrings
     , DeriveGeneric
     , FlexibleContexts
+    , FlexibleInstances
+    , TypeSynonymInstances
   exposed-modules:
       App
     , DBAdapter
@@ -86,6 +88,7 @@ executable AFP-Project
     , Models.User
     , Models.Target
     , Models.FullTarget
+    , Models.EditTarget
     , Models.Notification
     -- Handlers
     , Handlers.Account
@@ -98,6 +101,8 @@ executable AFP-Project
     , OverloadedStrings
     , DeriveGeneric
     , FlexibleContexts
+    , FlexibleInstances
+    , TypeSynonymInstances
   build-depends:
       AFP-Project
     , base

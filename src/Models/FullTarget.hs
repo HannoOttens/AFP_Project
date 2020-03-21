@@ -10,7 +10,7 @@ data FullTarget = FullTarget {
     userID      :: Int,
     websiteID   :: Int,
     websiteUrl  :: String,
-    lastUpdate  :: Int,
+    lastUpdate  :: String,
     selector    :: Maybe String 
 } deriving (Generic, Show)
 
@@ -19,3 +19,4 @@ instance FromRow FullTarget where
 
 instance ToJSON FullTarget
 instance FromJSON FullTarget
+

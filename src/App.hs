@@ -3,7 +3,6 @@ module App where
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.Auth.Server
-import Servant.Auth.Server.SetCookieOrphan ()
 import Control.Monad.Reader
 import Control.Monad.State
 

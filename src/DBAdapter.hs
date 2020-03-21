@@ -16,6 +16,9 @@ import qualified Models.Notification as NM
 import qualified Models.FullTarget as FTM
 import Config
 
+instance FromRow Int where
+  fromRow = field 
+
 -- | Initialize database with tables if do not already exist
 initDB :: AppConfig IO ()
 initDB = do
