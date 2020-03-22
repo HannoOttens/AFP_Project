@@ -11,15 +11,15 @@
 <body>
     <div class=Content>
         <h1>Account</h1>
-        Hallo hanno!
-        <button class=pull-right onclick="logOut()">Logout</button>
-        <button id=Subscribe class="pull-right mr10" onclick="subscribe()">Subscribe to notifications</button>
+        <button class="mr10 mt10" onclick="logOut()">Logout</button>
+        <button id=Subscribe onclick="subscribe()">Subscribe to notifications</button>
         <h2>Targets</h2>
         <div id=TargetError class="ErrorMsg NoDisplay mt10"></div>
         <table id=Targets>
         </table>
 
         <h2>Clients</h2>
+        <div id=ClientError class="ErrorMsg NoDisplay mt10"></div>
         <table id=Clients>
         </table>
     </div>
@@ -28,14 +28,14 @@
         $(() => setTimeout(() => {
             bindTargetList();
             bindClientList();
-            
+
             // Hide subscribe if already granted
             // if(Notification.permission == 'granted') 
-                // $("#Subscribe").hide();
+            // $("#Subscribe").hide();
         }, 1));
 
         // Get the targets list for this user from the server
-        var deleteAndEditBtn = '<td class=align-right>'
+        var targetBtns = '<td class=align-right>'
             + '<img onclick="inlineEdit($(this).parent().parent(), updateTarget, \'targetID\')" class="fa blue" src=img/edit.svg></img>'
             + '<img onclick="deleteTarget($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
             + '</td>'
@@ -44,18 +44,11 @@
                 { name: "URL", field: "websiteUrl", editable: true },
                 { name: "Selector", field: "selector", editable: true },
                 { name: "Last Update", field: "lastUpdate", templater: toDate },
-                { name: "", template: deleteAndEditBtn },
+                { name: "", template: targetBtns },
             ], updateTarget);
         }
-        function bindClientList() {
-            getList('notification/clients', '#Clients', 'P256dh', [
-                { name: "Device", field: "device" },
-                { name: "Browser", field: "browser" },
-                { name: "Token", field: "auth" },
-            ]);
-        }
 
-
+        // Update a target with the provided model (id == 0 => New target)
         function updateTarget(targetModel) {
             console.log(targetModel);
             $.ajax({
@@ -66,18 +59,14 @@
                     if (result) {
                         bindTargetList();
                         $("#TargetError").hide();
-                    } else 
-                        targetError("Kon target niet updaten.");
+                    } else
+                        targetError("Failed to update target.");
                 },
-                error: (err) => targetError("Kon target niet updaten.")
+                error: (err) => targetError("Failed to update target.")
             });
         }
 
-        function targetError(err) {
-            $("#TargetError").html(err);
-            $("#TargetError").show();
-        }
-
+        // Delete a target
         function deleteTarget(target) {
             var targetId = target.data("val");
             $.ajax({
@@ -89,10 +78,53 @@
                         bindTargetList();
                         $("#TargetError").hide();
                     } else
-                        targetError("Kon target niet verwijderen.");
+                        targetError("Failed to delete target.");
                 },
-                error: (err) => targetError("Kon target niet verwijderen."),
+                error: (err) => targetError("Failed to delete target."),
             });
+        }
+
+        // Show an error above the target list when something goes wrong
+        function targetError(err) {
+            $("#TargetError").html(err);
+            $("#TargetError").show();
+        }
+
+        // Get the client list for this user from the server  
+        var clientBtns = '<td class=align-right>'
+            + '<img onclick="deleteClient($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
+            + '</td>'
+        function bindClientList() {
+            getList('notification/clients', '#Clients', 'auth', [
+                { name: "Device", field: "device" },
+                { name: "Browser", field: "browser" },
+                { name: "Token", field: "auth" },
+                { name: "", template: clientBtns },
+            ]);
+        }
+
+        // Delete a client from the database to stop sending notifications
+        function deleteClient(client) {
+            var clientToken = client.data("val");
+            $.ajax({
+                method: "GET",
+                url: "notification/clientdelete",
+                data: { token: clientToken },
+                success: (result) => {
+                    if (result) {
+                        bindClientList();
+                        $("#ClientError").hide();
+                    } else
+                    clientError("Failed to delete client.");
+                },
+                error: (err) => clientError("Failed to delete client."),
+            });
+        }
+
+        // Show an error above the target list when something goes wrong
+        function clientError(err) {
+            $("#ClientError").html(err);
+            $("#ClientError").show();
         }
     </script>
 </body>

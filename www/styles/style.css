@@ -131,3 +131,10 @@ td {
     padding: 15px;
     border-radius: 5px;
 }
+
+.NoResults {
+    padding: 20px;
+    font-size: 18px;
+    color: gray;
+    text-align: center;
+}

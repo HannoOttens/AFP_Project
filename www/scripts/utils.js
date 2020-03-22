@@ -20,7 +20,6 @@ function getList(url, target, idField, columns, editable) {
         method: "GET",
         url: url,
         success: (result) => {
-            console.log(result);
             // Remove old
             $(target).empty();
 
@@ -31,23 +30,28 @@ function getList(url, target, idField, columns, editable) {
             })
             html += '</tr>'
 
-            // Insert rows
-            result.forEach((itm) => {
-                html += '<tr data-val="' + itm[idField] + '">';
-                columns.forEach((hd) => {
-                    if (hd.field) {
-                        let val = itm[hd.field];
-                        if (hd.templater) val = hd.templater(val);
-                        html += '<td data-value="' + val
-                            + '" data-field="' + hd.field
-                            + '" data-editable="' + !!hd.editable
-                            + '">' + val + '</td>';
-                    }
-                    else if (hd.template)
-                        html += '<td>' + hd.template + '</td>';
+            if (result.length == 0) {
+                html += '<tr><td class=NoResults>No records</td></tr>';
+            }
+            else {
+                // Insert rows
+                result.forEach((itm) => {
+                    html += '<tr data-val="' + itm[idField] + '">';
+                    columns.forEach((hd) => {
+                        if (hd.field) {
+                            let val = itm[hd.field];
+                            if (hd.templater) val = hd.templater(val);
+                            html += '<td data-value="' + val
+                                + '" data-field="' + hd.field
+                                + '" data-editable="' + !!hd.editable
+                                + '">' + val + '</td>';
+                        }
+                        else if (hd.template)
+                            html += '<td>' + hd.template + '</td>';
+                    });
+                    html += '</tr>'
                 });
-                html += '</tr>'
-            });
+            }
 
             // Insert editable row if editable
             if (editable) {
@@ -67,6 +71,7 @@ function getList(url, target, idField, columns, editable) {
             // Set new html
             $(target).html(html);
 
+            // Hijack the form submit to use the editable-callback
             $("#editForm").submit(function (event) {
                 event.preventDefault();
                 var formData = $(this).serialize();
