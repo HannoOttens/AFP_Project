@@ -5,12 +5,11 @@ import GHC.Generics (Generic)
 import Web.FormUrlEncoded (FromForm)
 
 -- | Specifies what gets returned from an edit operation
-data EditTarget = FullTarget {
+data EditTarget = EditTarget {
     targetID    :: Int,
     websiteUrl  :: String,
-    selector    :: Maybe String 
+    selector    :: Maybe String
 } deriving (Generic, Show)
 
 instance ToJSON EditTarget
-instance FromJSON EditTarget
 instance FromForm EditTarget

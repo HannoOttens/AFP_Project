@@ -136,7 +136,9 @@ test-suite test
   main-is: Test.hs
   other-modules:
         TestUtils
-      , AccountTest
+      , TargetTest
+      , LoginTest
+      , NotificationTest
       , ScraperTest
   default-extensions:
         OverloadedStrings     
@@ -155,5 +157,8 @@ test-suite test
       , wai-extra
       , http-api-data
       , aeson
+      , cookie
+      , containers
+      , directory
       , hashable
       , tagsoup

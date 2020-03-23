@@ -4,22 +4,27 @@ import Test.Hspec (Spec, hspec)
 import Test.Hspec.Wai(with)
 import Database.SQLite.Simple
 import Data.String(fromString)
+import System.Directory(removeFile, doesFileExist)
+import Control.Monad(when)
 
 import App(app)
 import Config
 import qualified DBAdapter as DB
 
-import AccountTest(accountTests)
+import NotificationTest(notificationTests)
+import LoginTest(loginTests)
+import TargetTest(targetTests)
 
 -- | specifications which use the server
 spec :: IO Application -> Spec
 spec app = with app $ do
-    accountTests
-    
+    loginTests
+    notificationTests
+    targetTests
 
 -- | Run tests with use of test database
 main :: IO ()
-main =
+main = do
     withConnection "test-db" $ \conn -> do
         conf <- config
         initDB conn
@@ -28,6 +33,9 @@ main =
             -- Before running each test, clear all tables in the database
             resetDB conn 
             return $ app $ conf {dbFile = "test-db"}
+    exists <- doesFileExist "test-db"
+    when exists (removeFile "test-db")
+    
 
 initDB :: Connection -> IO ()
 initDB conn = do 
