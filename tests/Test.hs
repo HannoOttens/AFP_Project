@@ -14,6 +14,7 @@ import qualified DBAdapter as DB
 import NotificationTest(notificationTests)
 import LoginTest(loginTests)
 import TargetTest(targetTests)
+import ScraperTest(scrapeTest)
 
 -- | specifications which use the server
 spec :: IO Application -> Spec
@@ -29,10 +30,12 @@ main = do
         conf <- config
         initDB conn
         putStrLn "\napi running on port 8080..."
-        hspec $ spec $ do
-            -- Before running each test, clear all tables in the database
-            resetDB conn 
-            return $ app $ conf {dbFile = "test-db"}
+        hspec $ do 
+            spec $ do
+                -- Before running each test, clear all tables in the database
+                resetDB conn 
+                return $ app $ conf {dbFile = "test-db"}
+            scrapeTest
     exists <- doesFileExist "test-db"
     when exists (removeFile "test-db")
     

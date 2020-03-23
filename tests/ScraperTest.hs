@@ -8,9 +8,8 @@ import Scraper
 
 testHTML :: String
 testHTML = "<html><div><div><div id=\"test\"><h1>Text</h1></div></div><!-- This is a comment --><p>html</p></div>Copyright</html>"
-
-main :: IO ()
-main = hspec $ do
+  
+scrapeTest = do
     describe "scrapePage" $
         it "test" $
             scrapePage testHTML == hash testHTML
