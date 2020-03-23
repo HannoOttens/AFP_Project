@@ -20,7 +20,7 @@ Create Table If Not Exists NotificationTokens (
 Create Table If Not Exists Websites (
 	WebsiteID Integer Not Null,
 	URL Text Not Null,
-	LastUpdate Integer,
+	LastUpdate Text,
 	Hash Integer,
 	Primary Key (WebsiteID)
 );
