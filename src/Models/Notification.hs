@@ -15,6 +15,18 @@ data NotificationMessage = NotificationMessage {
 
 instance A.ToJSON NotificationMessage
 
+
+data Notification = Notification { 
+    website   :: Text, 
+    message   :: Text, 
+    timestamp :: Int 
+} deriving (Generic)
+
+instance A.ToJSON Notification
+instance FromRow Notification where
+    fromRow = Notification <$> field <*> field <*> field
+
+
 data SubscriptionDetails = SubscriptionDetails {
     endpoint :: Text,
     hash     :: Text,

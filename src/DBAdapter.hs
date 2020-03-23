@@ -8,6 +8,7 @@ import Servant
 import Data.String
 import Data.Maybe(listToMaybe)
 import Data.List.Split
+import qualified Data.Text as T 
 
 import qualified Models.Website as WM
 import qualified Models.User as UM
@@ -83,8 +84,8 @@ getWebsites conn = query_ conn allWebsites
 -- | Check if website hash has changed, returns True if it has changed or website is not found
 checkWebsiteHash :: WebsiteID -> Hash -> (Connection -> IO Bool)
 checkWebsiteHash websiteID newHash conn = do 
-    result <- query conn checkHash (websiteID, newHash) :: IO [Only Int]
-    let (Only count) = head result
+    result <- query conn checkHash (websiteID, newHash)
+    let (Only count) = head result :: Only Int
     return $ count == 0
   where checkHash = "SELECT COUNT() "
                  <> "FROM Websites "
@@ -102,8 +103,8 @@ updateWebsiteHash websiteID newHash conn = do
 -- | Check if website hash has changed, returns True if it has changed or website is not found
 checkTargetHash :: WebsiteID -> Hash -> (Connection -> IO Bool)
 checkTargetHash websiteID newHash conn = do 
-    result <- query conn checkHash (websiteID, newHash) :: IO [Only Int]
-    let (Only count) = head result
+    result <- query conn checkHash (websiteID, newHash)
+    let (Only count) = head result :: Only Int
     return $ count == 0
   where checkHash = "SELECT COUNT() "
                  <> "FROM Targets "
@@ -144,10 +145,19 @@ getUser name conn = do
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
 addToken :: UM.User -> NM.SubscriptionDetails -> (Connection -> IO Bool)
 addToken user sub conn = do
-    execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
+    b <- doesSubAlreadyExists (UM.id user) (T.unpack $ NM.auth sub) conn 
+    unless b $ execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
     isSuccessful conn
   where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth, Device, Browser) "
                    <> "VALUES (?, ?, ?, ?, ?, ?)"
+
+doesSubAlreadyExists :: UserID -> Token -> (Connection -> IO Bool)
+doesSubAlreadyExists userId authToken conn = do
+    result <- query conn lookupToken (userId, authToken)
+    let (Only count) = head result :: Only Int
+    return $ count > 0
+  where lookupToken = "SELECT COUNT() FROM NotificationTokens "
+                   <> "WHERE UserID = ? AND Auth = ?"
 
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
 deleteToken :: UserID -> Token -> (Connection -> IO Bool)
@@ -163,6 +173,24 @@ getTokens userID conn = query conn lookupTokens (Only userID)
   where lookupTokens = "SELECT Endpoint, P256dh, Auth, Device, Browser "
                     <> "FROM NotificationTokens "
                     <> "WHERE UserID = ?"
+
+-- | Get the list of tokens for a user
+getNotificationHistory :: UserID -> (Connection -> IO [NM.Notification])
+getNotificationHistory userID conn = query conn lookupTokens (Only userID)
+  where lookupTokens = "SELECT W.URL, NT.Message, Timestamp "
+                    <> "FROM Notifications AS NT "
+                    <> "JOIN Websites AS W ON NT.WebsiteID = W.WebsiteID "
+                    <> "WHERE UserID = ? "
+                    <> "ORDER BY Timestamp DESC "
+
+-- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
+deleteNotificationHistory :: UserID -> (Connection -> IO Bool)
+deleteNotificationHistory userId conn = do 
+      execute conn delHistory (Only userId)
+      isSuccessful conn
+  where delHistory = "DELETE FROM Notifications "
+                  <> "WHERE UserID = ?" 
+
 
 -- | Get all users and selectors which are subscribed on given website
 getTargetsOnWebsite :: WebsiteID -> (Connection -> IO [TM.Target]) 
