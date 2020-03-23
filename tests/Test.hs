@@ -1,15 +1,16 @@
 
 import Network.Wai (Application)
 import Test.Hspec (Spec, hspec)
-import Test.Hspec.Wai(with)
+import Test.Hspec.Wai (with)
 import Database.SQLite.Simple
-import Data.String(fromString)
+import Data.String (fromString)
 
-import App(app)
+import App (app)
 import Config
 import qualified DBAdapter as DB
 
-import AccountTest(accountTests)
+import AccountTest (accountTests)
+import ScraperTest (scraperTests)
 
 -- | specifications which use the server
 spec :: IO Application -> Spec
@@ -19,7 +20,8 @@ spec app = with app $ do
 
 -- | Run tests with use of test database
 main :: IO ()
-main =
+main = do
+    hspec scraperTests
     withConnection "test-db" $ \conn -> do
         conf <- config
         initDB conn

@@ -42,7 +42,7 @@ pollTarget Nothing _ _ = do -- Full website as target, has already been checked,
 pollTarget (Just e) w s = do -- Specified target, check if that has changed
       liftIO $ putStrLn ("Polling " ++ url w ++ " with target " ++ e)
       let wid = idWebsite w
-      let h   = scrapeElement Nothing e s 
+      let h   = scrapeElement (e, Nothing) s 
       b <- DB.exec $ DB.checkTargetHash wid h
       when b $ do -- Target changed, update hash, notify user
             _ <- DB.exec $ DB.updateTargetHash wid h

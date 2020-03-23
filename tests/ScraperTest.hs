@@ -1,34 +1,33 @@
 module ScraperTest where
 
-import Test.Hspec
+import Test.Hspec (SpecWith, describe, it)
 import Data.Hashable
-import Text.HTML.TagSoup
 
 import Scraper
 
 testHTML :: String
 testHTML = "<html><div><div><div id=\"test\"><h1>Text</h1></div></div><!-- This is a comment --><p>html</p></div>Copyright</html>"
 
-main :: IO ()
-main = hspec $ do
+scraperTests :: SpecWith ()
+scraperTests = do
     describe "scrapePage" $
         it "test" $
             scrapePage testHTML == hash testHTML
     describe "scrapeElement" $ do
         it "html" $
-            test Nothing "html" "TexthtmlCopyright"
+            test ("html", Nothing) "TexthtmlCopyright"
         it "div" $
-            test Nothing "div" "Texthtml"
+            test ("div", Nothing) "Texthtml"
         it "h1" $
-            test Nothing "h1" "Text"
+            test ("h1", Nothing) "Text"
         it "tbody" $
-            test Nothing "tbody" ""
+            test ("tbody", Nothing) ""
         it "div (id=test)" $
-            test (Just ("id", "test")) "div" "Text"
+            test ("div", Just ("id", "test")) "Text"
         it "div (id=ntest)" $
-            test (Just ("id", "ntest")) "div" ""
+            test ("div", Just ("id", "ntest")) ""
         it "div (nid=test)" $
-            test (Just ("nid", "test")) "div" ""
+            test ("div", Just ("nid", "test")) ""
 
-test :: Maybe (Attribute String) -> Element -> String -> Bool
-test a e r = scrapeElement a e testHTML == hash r
+test :: Selector -> String -> Bool
+test s r = scrapeElement s testHTML == hash r
