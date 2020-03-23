@@ -26,15 +26,16 @@ spec app = with app $ do
 -- | Run tests with use of test database
 main :: IO ()
 main = do
-    hspec scraperTests
     withConnection "test-db" $ \conn -> do
         conf <- config
         initDB conn
         putStrLn "\napi running on port 8080..."
-        hspec $ spec $ do
-            -- Before running each test, clear all tables in the database
-            resetDB conn 
-            return $ app $ conf {dbFile = "test-db"}
+        hspec $ do 
+            spec $ do
+                -- Before running each test, clear all tables in the database
+                resetDB conn 
+                return $ app $ conf {dbFile = "test-db"}
+            scraperTests
     exists <- doesFileExist "test-db"
     when exists (removeFile "test-db")
     
