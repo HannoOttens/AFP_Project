@@ -14,16 +14,20 @@ import Models.User as UM
 import qualified DBAdapter as DB 
 
 type NotificationAPI = "notification" :> (
-         "subscribe"    :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
-    :<|> "keys"                                                          :> Get  '[JSON] [Word8]
-    :<|> "clients"                                                       :> Get  '[JSON] [SubscriptionDetails]
-    :<|> "clientdelete" :> QueryParam "token" String                     :> Get  '[JSON] Bool)
+         "subscribe"     :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
+    :<|> "keys"                                                           :> Get  '[JSON] [Word8]
+    :<|> "clients"                                                        :> Get  '[JSON] [SubscriptionDetails]
+    :<|> "clientdelete"  :> QueryParam "token" String                     :> Get  '[JSON] Bool
+    :<|> "list"                                                           :> Get  '[JSON] [Notification]
+    :<|> "clearhistory"                                                   :> Get  '[JSON] Bool)
 
 notificationServer :: ServerT NotificationAPI (AppContext Handler)
 notificationServer = subscribe
                 :<|> keys
                 :<|> clients
                 :<|> deleteClient
+                :<|> notifications
+                :<|> clearHistory
 
 -- | Store subscription details of user
 subscribe :: SubscriptionDetails -> AppContext Handler Response
@@ -48,10 +52,22 @@ clients = trace "notification/clients" $ do
 
 -- | Client a target from the users list of clients
 deleteClient :: Maybe String -> AppContext Handler Bool
-deleteClient tokenQ = trace "notification/delete" $ do
+deleteClient tokenQ = trace "notification/clientdelete" $ do
     -- Check if query parameter is there
     unless (isJust tokenQ) (throwError err404)
     let token = fromJust tokenQ
     userId <- gets UM.id
     -- Remove the target
     DB.contextDbAction $ DB.deleteToken userId token
+
+
+notifications :: AppContext Handler [Notification]
+notifications = trace "notification/list" $ do
+    userId <- gets UM.id
+    DB.contextDbAction $ DB.getNotificationHistory userId
+
+clearHistory :: AppContext Handler Bool
+clearHistory = trace "notification/clearhistory" $ do
+    userId <- gets UM.id
+    -- Remove the history
+    DB.contextDbAction $ DB.deleteNotificationHistory userId

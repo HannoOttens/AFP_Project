@@ -22,23 +22,30 @@
         <div id=ClientError class="ErrorMsg NoDisplay mt10"></div>
         <table id=Clients>
         </table>
+
+        <h2>Notification history</h2>
+        <button class="mr10 mt10" onclick="clearNotificationHistory()">Clear history</button>
+        <div id=NotificationError class="ErrorMsg NoDisplay mt10"></div>
+        <table id=Notifications>
+        </table>
     </div>
 
     <script>
         $(() => setTimeout(() => {
             bindTargetList();
             bindClientList();
+            bindNotificationList();
 
             // Hide subscribe if already granted
             // if(Notification.permission == 'granted') 
             // $("#Subscribe").hide();
         }, 1));
 
-        // Get the targets list for this user from the server
         var targetBtns = '<td class=align-right>'
             + '<img onclick="inlineEdit($(this).parent().parent(), updateTarget, \'targetID\')" class="fa blue" src=img/edit.svg></img>'
             + '<img onclick="deleteTarget($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
-            + '</td>'
+            + '</td>';
+        /** Get the targets list for this user from the server */
         function bindTargetList() {
             getList('target/list', '#Targets', 'targetID', [
                 { name: "URL", field: "websiteUrl", editable: true },
@@ -48,7 +55,7 @@
             ], updateTarget);
         }
 
-        // Update a target with the provided model (id == 0 => New target)
+        /** Update a target with the provided model (id == 0 => New target) */
         function updateTarget(targetModel) {
             console.log(targetModel);
             $.ajax({
@@ -66,7 +73,7 @@
             });
         }
 
-        // Delete a target
+        /* Delete a target **/
         function deleteTarget(target) {
             var targetId = target.data("val");
             $.ajax({
@@ -84,16 +91,16 @@
             });
         }
 
-        // Show an error above the target list when something goes wrong
+        /** Show an error above the target list when something goes wrong */
         function targetError(err) {
             $("#TargetError").html(err);
             $("#TargetError").show();
         }
 
-        // Get the client list for this user from the server  
         var clientBtns = '<td class=align-right>'
             + '<img onclick="deleteClient($(this).parent().parent())" class="fa ml5 red" src=img/trash-alt.svg></img>'
-            + '</td>'
+            + '</td>';
+        /** Get the client list for this user from the server  */
         function bindClientList() {
             getList('notification/clients', '#Clients', 'auth', [
                 { name: "Device", field: "device" },
@@ -103,7 +110,7 @@
             ]);
         }
 
-        // Delete a client from the database to stop sending notifications
+        /** Delete a client from the database to stop sending notifications */
         function deleteClient(client) {
             var clientToken = client.data("val");
             $.ajax({
@@ -115,16 +122,47 @@
                         bindClientList();
                         $("#ClientError").hide();
                     } else
-                    clientError("Failed to delete client.");
+                        clientError("Failed to delete client.");
                 },
                 error: (err) => clientError("Failed to delete client."),
             });
         }
 
-        // Show an error above the target list when something goes wrong
+        /** Show an error above the client list when something goes wrong */
         function clientError(err) {
             $("#ClientError").html(err);
             $("#ClientError").show();
+        }
+
+        /** Get the notification history for this user from the server */
+        function bindNotificationList() {
+            getList('notification/list', '#Notifications', 'id', [
+                { name: "Website", field: "website" },
+                { name: "Message", field: "message" },
+                { name: "Date", field: "timestamp", templater: toDate },
+            ]);
+        }
+
+        /** Remove all old notifications */
+        function clearNotificationHistory() {
+            $.ajax({
+                method: "GET",
+                url: "notification/clearhistory",
+                success: (result) => {
+                    if (result) {
+                        bindNotificationList();
+                        $("#NotificationError").hide();
+                    } else
+                    notificationError("Failed to clear history.");
+                },
+                error: (err) => notificationError("Failed to clear history."),
+            });
+        }
+
+        /** Show an error above the notification list when something goes wrong */
+        function notificationError(err) {
+            $("#NotificationError").html(err);
+            $("#NotificationError").show();
         }
     </script>
 </body>

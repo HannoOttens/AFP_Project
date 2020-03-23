@@ -164,6 +164,24 @@ getTokens userID conn = query conn lookupTokens (Only userID)
                     <> "FROM NotificationTokens "
                     <> "WHERE UserID = ?"
 
+-- | Get the list of tokens for a user
+getNotificationHistory :: UserID -> (Connection -> IO [NM.Notification])
+getNotificationHistory userID conn = query conn lookupTokens (Only userID)
+  where lookupTokens = "SELECT W.URL, NT.Message, Timestamp "
+                    <> "FROM Notifications AS NT "
+                    <> "JOIN Websites AS W ON NT.WebsiteID = W.WebsiteID "
+                    <> "WHERE UserID = ? "
+                    <> "ORDER BY Timestamp DESC "
+
+-- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
+deleteNotificationHistory :: UserID -> (Connection -> IO Bool)
+deleteNotificationHistory userId conn = do 
+      execute conn delHistory (Only userId)
+      isSuccessful conn
+  where delHistory = "DELETE FROM Notifications "
+                  <> "WHERE UserID = ?" 
+
+
 -- | Get all users and selectors which are subscribed on given website
 getTargetsOnWebsite :: WebsiteID -> (Connection -> IO [TM.Target])
 getTargetsOnWebsite websiteID conn = 
