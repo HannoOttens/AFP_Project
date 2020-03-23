@@ -136,6 +136,7 @@ test-suite test
   other-modules:
         TestUtils
       , AccountTest
+      , ScraperTest
   default-extensions:
         OverloadedStrings     
   build-depends:
@@ -153,3 +154,5 @@ test-suite test
       , wai-extra
       , http-api-data
       , aeson
+      , hashable
+      , tagsoup

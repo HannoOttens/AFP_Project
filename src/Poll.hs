@@ -54,7 +54,7 @@ pollTarget t w s = do
       let (Just e) = selector t
       let wid = idWebsite w
       liftIO $ putStrLn ("Polling: " ++ url w ++ " with target " ++ e) 
-      let h = scrapeElement e s 
+      let h = scrapeElement Nothing e s 
       b <- DB.exec $ DB.checkTargetHash wid h
       when b $ do
             _ <- DB.exec $ DB.updateTargetHash wid h
