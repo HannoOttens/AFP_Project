@@ -106,9 +106,8 @@ function inlineEdit(row, callback, idField) {
     });
 }
 
-/** Convert an interger to a data-string  */
-function toDate(intDate) {
-    var dateStr = (new Date(intDate)).toISOString()
-    return dateStr.substring(11, 16) + ", " + dateStr.substring(0, 10);
+/** Convert to local datetime string  */
+function toDate(utcDateTime) {
+    return (new Date(utcDateTime)).toLocaleString();
 }
 

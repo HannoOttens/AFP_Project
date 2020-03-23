@@ -165,10 +165,10 @@ getTokens userID conn = query conn lookupTokens (Only userID)
                     <> "WHERE UserID = ?"
 
 -- | Get all users and selectors which are subscribed on given website
-getTargetsOnWebsite :: WebsiteID -> (Connection -> IO [TM.Target])
+getTargetsOnWebsite :: WebsiteID -> (Connection -> IO [TM.Target]) 
 getTargetsOnWebsite websiteID conn = 
     query conn lookupTargets (Only websiteID)
-  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector "
+  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector, Hash "
                      <> "FROM Targets "
                      <> "WHERE websiteID = ?"
 

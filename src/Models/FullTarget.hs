@@ -1,5 +1,6 @@
 module Models.FullTarget where
 
+import Data.Time(UTCTime)
 import Data.Aeson
 import Database.SQLite.Simple
 import GHC.Generics (Generic)
@@ -10,7 +11,7 @@ data FullTarget = FullTarget {
     userID      :: Int,
     websiteID   :: Int,
     websiteUrl  :: String,
-    lastUpdate  :: String,
+    lastUpdate  :: UTCTime,
     selector    :: Maybe String 
 } deriving (Generic, Show)
 
