@@ -11,8 +11,6 @@ main :: IO ()
 main = do
   conf <- config
   _ <- execSchedule $
-        addJob (runReaderT pollWebsites conf) $ pollSchedule conf
-  _ <- execSchedule $
         addJob (runReaderT pollTargets  conf) $ pollSchedule conf
   runReaderT DB.initDB conf
   runApp conf
