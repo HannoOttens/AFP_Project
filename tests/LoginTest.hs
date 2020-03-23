@@ -1,18 +1,19 @@
-module AccountTest where
+module LoginTest where
 
-import Network.Wai (Application)
+import Network.Wai (Application, Request(..))
+import Network.Wai.Test
 import Test.Hspec (SpecWith, describe, it)
-import Test.Hspec.Wai(shouldRespondWith)
+import Test.Hspec.Wai
 import Data.String(fromString)
-import Web.FormUrlEncoded(ToForm)
 
 import Models.Register
 import Models.Login
+import Models.Notification
 
 import TestUtils
 
-accountTests :: SpecWith (st, Application)
-accountTests = describe "register user" $ do
+loginTests :: SpecWith (st, Application)
+loginTests = describe "login and register endpoint" $ do
         it "responds with 301 after registering" $
             postForm "/register" registerForm `shouldRespondWith` 301
         it "responds with 200 after valid credentials" $ do
@@ -37,6 +38,3 @@ loginFormInvalidPassword = LoginForm "test" "false"
 
 loginFormInvalidUser :: LoginForm
 loginFormInvalidUser = LoginForm "test1" "password"
-
-instance ToForm RegisterForm
-instance ToForm LoginForm
