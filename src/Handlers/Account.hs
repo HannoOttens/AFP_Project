@@ -25,7 +25,11 @@ accountServer = login
 
 -- | Register a user
 register :: RegisterForm -> AppConfig Handler PostRedirectHandler
+<<<<<<< HEAD
 register form = trace "account/register" $
+=======
+register form = trace "account/register" $ do
+>>>>>>> master
     if RM.password form == RM.rpassword form 
     then do 
         success <- liftDbAction $ DB.addUser UM.User { UM.id = 0,
