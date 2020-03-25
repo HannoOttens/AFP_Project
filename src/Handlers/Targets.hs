@@ -7,6 +7,7 @@ import Debug.Trace
 import Data.Maybe
 import Control.Monad.Reader
 import Control.Monad.State
+import Network.URI (isURI)
 
 import Models.Target as TM
 import Models.FullTarget as FTM
@@ -31,6 +32,8 @@ editTarget targetModel = trace "target/update" $ do
     userId <- gets UM.id
     existingTarget <- DB.contextDbAction $ DB.getTarget (ETM.targetID targetModel)
     unless (isNothing existingTarget || userId == TM.userID (fromJust existingTarget)) (throwError err401)
+    -- Check if target website is valid url
+    unless (isURI $ ETM.websiteUrl targetModel) (throwError err500)
     -- Insert the website (if it does not exist) and get the ID
     let website = WM.Website { WM.url = ETM.websiteUrl targetModel
                              , WM.idWebsite = 0

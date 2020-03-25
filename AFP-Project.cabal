@@ -68,6 +68,7 @@ library
     , http-client
     , http-client-tls
     , bytestring
+    , network-uri
 
 executable AFP-Project
   ghc-options:         -Wall
@@ -128,6 +129,7 @@ executable AFP-Project
     , http-client
     , http-client-tls
     , bytestring
+    , network-uri
 
 test-suite test
   default-language: Haskell2010
