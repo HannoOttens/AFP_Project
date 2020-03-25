@@ -17,7 +17,7 @@ function logOut() {
  * @param {Function} editable - Function to send the grid data to
  *  */
 function getList(url, target, idField, columns, editable) {
-    $.ajax({
+    return $.ajax({
         method: "GET",
         url: url,
         success: (result) => {
@@ -108,7 +108,7 @@ function inlineEdit(row, callback, idField) {
         event.preventDefault();
         var formData = $(this).serializeArray();
         formData = formData.filter(param => 0 !== param.value.length);
-        formData.push({name: idField, value: 0})
+        formData.push({name: idField, value: $(row).data("val")})
         callback(formData);
     });
 }
