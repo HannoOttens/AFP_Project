@@ -27,6 +27,10 @@ targetServer =  deleteTarget :<|> editTarget :<|> listTargets
 
 editTarget :: ETM.EditTarget -> AppContext Handler Bool
 editTarget targetModel = trace "target/update" $ do
+    -- Only allow users to edit their own targets
+    userId <- gets UM.id
+    target <- DB.contextDbAction $ DB.getTarget (ETM.targetID targetModel)
+    unless (isNothing target || userId == TM.userID (fromJust target)) (throwError err401)
     -- Insert the website (if it does not exist) and get the ID
     let website = WM.Website { WM.url = ETM.websiteUrl targetModel
                              , WM.idWebsite = 0
