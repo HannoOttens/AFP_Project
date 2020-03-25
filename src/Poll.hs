@@ -55,5 +55,6 @@ getSite u = getResponseBody =<< simpleHTTP (getRequest u)
 -- Create a notification
 notify :: Int -> URL -> String -> AppConfig IO ()
 notify user site msg = do
-      _ <- createNotificationDetails user $ newNotification site msg
+      n <- createNotificationDetails user $ newNotification site msg
+      _ <- sendNotifications n
       return ()
