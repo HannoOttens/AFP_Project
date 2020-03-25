@@ -48,8 +48,8 @@
         /** Get the targets list for this user from the server */
         function bindTargetList() {
             getList('target/list', '#Targets', 'targetID', [
-                { name: "URL", field: "websiteUrl", editable: true },
-                { name: "Selector", field: "selector", editable: true },
+                { name: "URL", field: "websiteUrl", editable: true, required: true },
+                { name: "Selector", field: "selector", editable: true, required: false, templater: toSelector },
                 { name: "Last Update", field: "lastUpdate", templater: toDate },
                 { name: "", template: targetBtns },
             ], updateTarget);

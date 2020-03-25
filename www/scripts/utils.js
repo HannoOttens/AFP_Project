@@ -13,6 +13,7 @@ function logOut() {
  *      - field: Field to get the data from
  *      - templater: Function to construct HTML from the data field
  *      - tempalte: Static template for the column
+ *      - required: Specifies if field is required when adding new values
  * @param {Function} editable - Function to send the grid data to
  *  */
 function getList(url, target, idField, columns, editable) {
@@ -44,6 +45,7 @@ function getList(url, target, idField, columns, editable) {
                             html += '<td data-value="' + val
                                 + '" data-field="' + hd.field
                                 + '" data-editable="' + !!hd.editable
+                                + '" data-required="' + !!hd.required
                                 + '">' + val + '</td>';
                         }
                         else if (hd.template)
@@ -60,7 +62,7 @@ function getList(url, target, idField, columns, editable) {
                 columns.forEach((hd) => {
                     html += '<td>'
                     if (hd.editable) {
-                        html += '<input form=editForm name="' + hd.field + '" />'
+                        html += '<input form=editForm name="' + hd.field + '" ' + (hd.required ? 'required' : '') + ' />'
                     }
                     html += '</td>';
                 })
@@ -74,8 +76,9 @@ function getList(url, target, idField, columns, editable) {
             // Hijack the form submit to use the editable-callback
             $("#editForm").submit(function (event) {
                 event.preventDefault();
-                var formData = $(this).serialize();
-                formData += "&" + idField + "=0"
+                var formData = $(this).serializeArray();
+                formData = formData.filter(param => 0 !== param.value.length);
+                formData.push({name: idField, value: 0})
                 editable(formData);
             });
         }
@@ -89,9 +92,12 @@ function inlineEdit(row, callback, idField) {
         let editable = $item.data("editable");
         let value = $item.data("value");
         let field = $item.data("field");
+        let required = $item.data("required");
 
         if (editable)
-            html += '<td><input form=inlineEditForm name="' + field + '" value="' + value + '" /></td>'
+            html += '<td><input form=inlineEditForm name="' 
+                 + field + '" value="' + value + '"' 
+                 + (required ? ' required ' : ' ') + '/></td>'
     });
     html += '<td><button form=inlineEditForm type=submit>Update</button></td>'
 
@@ -100,8 +106,9 @@ function inlineEdit(row, callback, idField) {
 
     $("#inlineEditForm").submit(function (event) {
         event.preventDefault();
-        var formData = $(this).serialize();
-        formData += "&" + idField + "=" + $(row).data("val");
+        var formData = $(this).serializeArray();
+        formData = formData.filter(param => 0 !== param.value.length);
+        formData.push({name: idField, value: 0})
         callback(formData);
     });
 }
@@ -109,5 +116,10 @@ function inlineEdit(row, callback, idField) {
 /** Convert to local datetime string  */
 function toDate(utcDateTime) {
     return (new Date(utcDateTime)).toLocaleString();
+}
+
+/** If no selector is given, display 'no selector' */
+function toSelector(value) {
+    return value !== null ? value : "No selector" 
 }
 
