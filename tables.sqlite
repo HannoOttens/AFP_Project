@@ -39,11 +39,12 @@ Create Table If Not Exists Targets (
 );
 
 Create Table If Not Exists Notifications (
+	NotificationID Integer Not Null,
 	UserID Integer Not Null,
 	WebsiteID Integer Not Null,
 	Message Text,
-	Timestamp Integer Not Null,
-	Primary Key (UserID, WebsiteID),
+	Timestamp Text Not Null,
+	Primary Key (NotificationID),
 	Foreign Key (UserID) References Users (UserID),
     Foreign Key (WebsiteID) References Websites (WebsiteID)
 )

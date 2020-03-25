@@ -39,7 +39,7 @@ pollTargets = do
 pollTarget :: Target -> Website -> SiteContent -> AppConfig IO ()
 pollTarget t w s = case selector t of
       -- Full website as target, has already been checked, notify user
-      Nothing -> notify (userID t) (url w) $ "Website " ++ url w ++ " has changed!"
+      Nothing -> notify (userID t) w $ "Website " ++ url w ++ " has changed!"
       -- Specified target, check if that has changed
       (Just e) -> do 
             liftIO $ putStrLn $ "Polling " ++ url w ++ " with target " ++ e
@@ -47,7 +47,7 @@ pollTarget t w s = case selector t of
             b <- DB.exec $ DB.checkTargetHash (idWebsite w) h
             when b $ do -- Target changed, update hash, notify user
                   _ <- DB.exec $ DB.updateTargetHash (idWebsite w) h
-                  notify (userID t) (url w) $ "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
+                  notify (userID t) w $ "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
 
 -- Return site as string
 getSite :: URL -> AppConfig IO String
@@ -57,8 +57,9 @@ getSite u = do man <- asks manager
                return . unpack $ responseBody response
 
 -- Create a notification
-notify :: Int -> URL -> String -> AppConfig IO ()
+notify :: Int -> Website -> String -> AppConfig IO ()
 notify user site msg = do
-      n <- createNotificationDetails user $ newNotification site msg
+      n <- createNotificationDetails user $ newNotification (url site) msg
+      DB.exec $ DB.addNotification user (idWebsite site) msg
       _ <- sendNotifications n
       return ()

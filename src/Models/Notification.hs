@@ -5,6 +5,7 @@ import GHC.Generics
 import Data.Text
 import Database.SQLite.Simple
 import Web.FormUrlEncoded (FromForm)
+import Data.Time
 
 data NotificationMessage = NotificationMessage { 
     title   :: Text, 
@@ -19,7 +20,7 @@ instance A.ToJSON NotificationMessage
 data Notification = Notification { 
     website   :: Text, 
     message   :: Text, 
-    timestamp :: Int 
+    timestamp :: UTCTime 
 } deriving (Generic)
 
 instance A.ToJSON Notification

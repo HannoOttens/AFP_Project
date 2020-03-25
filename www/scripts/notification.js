@@ -18,8 +18,11 @@ function subscribe() {
     .then(subscribeUser)
     .then(postSubscription)
     .then(function (response) {
-        if (response.success) alert("Successfully subscribed!");
-        else throw new Error("Subscription failed");
+        if (response.success) {
+            bindClientList();
+            alert("Successfully subscribed!");
+        }
+        else throw new Error("You are already subscribed");
     })
     .catch(err => alert(err));
 }

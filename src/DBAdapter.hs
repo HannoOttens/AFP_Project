@@ -35,10 +35,6 @@ initDB = do
 splitQuery :: String -> [Query]
 splitQuery = map fromString . splitOn ";"
 
-execDB :: (Connection -> IO a) -> IO a
-execDB f = do conf <- config
-              runReaderT (exec f) conf
-
 contextDbAction :: (Connection -> IO a) -> AppContext Handler a
 contextDbAction = lift . liftDbAction
 
@@ -173,6 +169,12 @@ getTokens userID conn = query conn lookupTokens (Only userID)
   where lookupTokens = "SELECT Endpoint, P256dh, Auth, Device, Browser "
                     <> "FROM NotificationTokens "
                     <> "WHERE UserID = ?"
+
+addNotification :: UserID -> WebsiteID -> String -> (Connection -> IO ())
+addNotification userID websiteID msg conn =
+      execute conn insertNotification (userID, websiteID, msg)
+  where insertNotification = "INSERT INTO Notifications (UserID, WebsiteID, Message, Timestamp) "
+                          <> "VALUES (?, ?, ?, datetime('now'))"
 
 -- | Get the list of tokens for a user
 getNotificationHistory :: UserID -> (Connection -> IO [NM.Notification])
