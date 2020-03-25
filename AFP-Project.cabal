@@ -62,12 +62,12 @@ library
     , split
     , cron
     , text
-    , HTTP
     , tagsoup
     , web-push
     , lens
     , http-client
     , http-client-tls
+    , bytestring
 
 executable AFP-Project
   ghc-options:         -Wall
@@ -122,12 +122,12 @@ executable AFP-Project
     , split
     , cron
     , text
-    , HTTP
     , tagsoup
     , web-push
     , lens
     , http-client
     , http-client-tls
+    , bytestring
 
 test-suite test
   default-language: Haskell2010

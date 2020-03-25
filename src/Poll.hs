@@ -1,8 +1,9 @@
 module Poll where
 
-import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
+import Network.HTTP.Client
 import Control.Monad
 import Control.Monad.Reader
+import Data.ByteString.Lazy.Char8(unpack)
 
 import qualified DBAdapter as DB
 import Config
@@ -16,7 +17,7 @@ pollWebsite ws = do
       let u   = url ws
       let wid = idWebsite ws
       liftIO $ putStrLn ("Polling " ++ u)
-      site <- liftIO $ getSite u
+      site <- getSite u
       let h = scrapePage site
       b <- DB.exec $ DB.checkWebsiteHash wid h
       when b $ do -- Website changed, update hash
@@ -50,5 +51,8 @@ pollTarget (Just e) w s = do -- Specified target, check if that has changed
             return ()
 
 -- Return site as string
-getSite :: URL -> IO String
-getSite u = getResponseBody =<< simpleHTTP (getRequest u)
+getSite :: URL -> AppConfig IO String
+getSite u = do man <- asks manager
+               req <- liftIO $ parseRequest u
+               response <- liftIO $ httpLbs req man
+               return . unpack $ responseBody response
