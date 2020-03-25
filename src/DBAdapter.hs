@@ -116,7 +116,7 @@ updateTargetHash websiteID newHash conn = do
     execute conn updateHash (newHash, websiteID)
     (== 1) <$> changes conn
   where updateHash = "UPDATE Targets "
-                  <> "SET Hash = ?, "
+                  <> "SET Hash = ? "
                   <> "WHERE WebsiteID = ?"
 
 {-| Add a new user to the database, if username is not already in use.
