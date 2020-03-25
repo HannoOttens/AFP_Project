@@ -4,8 +4,7 @@ import Data.Hashable
 import Text.HTML.TagSoup
 
 type SiteContent = String
-type Element     = String
-type Selector    = (Element, Maybe (Attribute String))
+type Selector    = (String, Maybe (Attribute String)) -- Element, optional attribute
 type Nesting     = Int
 newtype Tags     = Tags [Tag String]
 
@@ -18,7 +17,7 @@ scrapePage = hash
 
 -- Return all text within an element and optional attribute
 scrapeElement :: Selector -> SiteContent -> Int
-scrapeElement s site = hash $ Tags $ filterTags s (parseTags site)
+scrapeElement s site = hash . Tags . filterTags s $ parseTags site
 
 -- Introduce nesting
 filterTags :: Selector -> [Tag String] -> [Tag String]
