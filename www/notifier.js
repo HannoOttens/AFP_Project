@@ -5,22 +5,42 @@ self.addEventListener('push', function(e) {
   
     var options = {
       body: data.body,
-      icon: data.icon,
+      icon: (new URL(data.icon, data.url)).toString(),
       vibrate: [100, 50, 100],
       data: {
+        url: (new URL(data.url)).toString(),
         dateOfArrival: Date.now(),
         primaryKey: 1
       },
       actions: [
-        {action: 'explore', title: 'Explore this new world',
-          icon: 'images/checkmark.png'},
-        {action: 'close', title: 'I don\'t want any of this',
-          icon: 'images/xmark.png'},
+        {action: 'open', title: 'Open website',
+          icon: 'img/open.svg'},
+        {action: 'close', title: 'Close',
+          icon: 'img/xmark.svg'},
       ]
     };
 
     e.waitUntil(
       self.registration.showNotification(data.title, options)
     );
-  });
+});
+
+self.addEventListener('notificationclick', function(event) {
+    if (!event.action) {
+      return;
+    }
+    
+    switch (event.action) {
+      case 'open':
+        const url = event.notification.data.url;
+        const promiseChain = clients.openWindow(url);
+        event.waitUntil(promiseChain);
+        break;
+      case 'close':
+          event.notification.close();
+        break;
+      default:
+        break;
+    }
+});
   

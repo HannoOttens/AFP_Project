@@ -31,10 +31,3 @@ sendNotifications msgs = map (T.unpack . view pushEndpoint) <$> filterM p msgs
                      return $ case response of
                          Left RecepientEndpointNotFound -> True
                          _                              -> False
-
-testNotification :: AppConfig IO ()
-testNotification = do
-    let msg = newNotification "Test" "This is a test notification"
-    msgs <- createNotificationDetails 1 msg
-    errors <- sendNotifications msgs
-    liftIO $ print errors

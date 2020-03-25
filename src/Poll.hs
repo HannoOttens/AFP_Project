@@ -9,7 +9,7 @@ import qualified DBAdapter as DB
 import Config
 import Notification
 import Scraper
-import Models.Notification
+import Models.Notification(newNotification)
 import Models.Target
 import Models.Website
 
@@ -59,7 +59,7 @@ getSite u = do man <- asks manager
 -- Create a notification
 notify :: Int -> Website -> String -> AppConfig IO ()
 notify user site msg = do
-      n <- createNotificationDetails user $ newNotification (url site) msg
+      n <- createNotificationDetails user $ newNotification (url site) msg (url site)
       DB.exec $ DB.addNotification user (idWebsite site) msg
       _ <- sendNotifications n
       return ()

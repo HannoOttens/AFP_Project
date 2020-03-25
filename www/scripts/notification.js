@@ -30,7 +30,6 @@ function subscribe() {
 // Get public key of server to register service worker
 function getPublicKey() {
     return new Promise(function(resolve, reject) {
-        setXSRF();
         $.ajax("/notification/keys", {
             method: 'GET',
             success: function (data) {
@@ -45,7 +44,6 @@ function getPublicKey() {
 // Pass details to send notifications to server
 function postSubscription(sub) {
     return new Promise(function(resolve, reject) {
-        setXSRF();
         $.ajax("/notification/subscribe", {
             method: 'POST',
             data: sub,

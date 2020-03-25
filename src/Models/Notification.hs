@@ -9,9 +9,9 @@ import Data.Time
 
 data NotificationMessage = NotificationMessage { 
     title   :: Text, 
-    body    :: Text, 
-    icon    :: Text, 
-    vibrate :: [Int]
+    body    :: Text,
+    url     :: Text, 
+    icon    :: Text
 } deriving (Generic)
 
 instance A.ToJSON NotificationMessage
@@ -47,10 +47,10 @@ data Response = Response {
 
 instance A.ToJSON Response  
 
-newNotification :: String -> String -> NotificationMessage
-newNotification t b = NotificationMessage {
+newNotification :: String -> String -> String -> NotificationMessage
+newNotification t b u = NotificationMessage {
     title = pack t,
     body = pack b,
-    icon = "icon.png",
-    vibrate = [100,50,100]
+    url = pack u,
+    icon = "favicon.ico"
 }
