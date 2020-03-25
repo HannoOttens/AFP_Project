@@ -59,5 +59,6 @@ getSite u = do man <- asks manager
 -- Create a notification
 notify :: Int -> URL -> String -> AppConfig IO ()
 notify user site msg = do
-      _ <- createNotificationDetails user $ newNotification site msg
+      n <- createNotificationDetails user $ newNotification site msg
+      _ <- sendNotifications n
       return ()
