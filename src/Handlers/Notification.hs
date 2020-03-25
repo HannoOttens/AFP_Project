@@ -47,8 +47,7 @@ keys = trace "notification/keys" $ do
 clients :: AppContext Handler [SubscriptionDetails]
 clients = trace "notification/clients" $ do 
     userId <- gets UM.id
-    clients <- DB.contextDbAction $ DB.getTokens userId
-    return clients
+    DB.contextDbAction $ DB.getTokens userId
 
 -- | Client a target from the users list of clients
 deleteClient :: Maybe String -> AppContext Handler Bool
