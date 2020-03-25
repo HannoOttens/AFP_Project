@@ -25,7 +25,7 @@ type LoginHandler = Headers '[Header "Location" String
 redirect
   :: String -- ^ what to put in the 'Location' header
   -> AppConfig Handler PostRedirectHandler
-redirect a = return $ (addHeader a NoContent)
+redirect a = return $ addHeader a NoContent
 
 redirectWithCookie
   :: Config
@@ -36,5 +36,5 @@ redirectWithCookie conf user a = do
   mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
   case mApplyCookies of
     Nothing           -> throwError err401
-    Just applyCookies -> return $ (addHeader a (applyCookies NoContent))
+    Just applyCookies -> return $ addHeader a (applyCookies NoContent)
    
