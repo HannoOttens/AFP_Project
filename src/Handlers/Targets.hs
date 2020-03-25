@@ -69,5 +69,4 @@ deleteTarget targetIdQ = trace "target/delete" $ do
 listTargets ::  AppContext Handler [FTM.FullTarget]
 listTargets = trace "target/list" $ do
     userId <- gets UM.id
-    targets <- DB.contextDbAction $ DB.getTargetsOfUser userId
-    return targets
+    DB.contextDbAction $ DB.getTargetsOfUser userId

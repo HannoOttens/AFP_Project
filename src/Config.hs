@@ -32,10 +32,11 @@ data Config = Config {
 config :: IO Config
 config = 
       do 
-      jwtKey <- generateKey
+      jwtKey       <- generateKey
       vapidDetails <- readVapidDetails
-      connManager <- newManager tlsManagerSettings
-      let cookieSets = defaultCookieSettings { cookieIsSecure  = NotSecure, cookieXsrfSetting = Just xcrf }
+      connManager  <- newManager tlsManagerSettings
+      let cookieSets = defaultCookieSettings { cookieIsSecure  = NotSecure
+                                             , cookieXsrfSetting = Just xcrf }
           xcrf = def { xsrfExcludeGet = True }
           jwtSets = defaultJWTSettings jwtKey
           vapidKeyPair = readVAPIDKeys vapidDetails
@@ -43,7 +44,7 @@ config =
             dbFile = "db",
             initFile = "tables.sqlite",
             pollSchedule = "0-59 * * * *",
-            authConf = (cookieSets :. jwtSets :. EmptyContext),
+            authConf = cookieSets :. jwtSets :. EmptyContext,
             cookieSettings = cookieSets,
             jwtSettings = jwtSets,
             vapidKeys = vapidKeyPair,

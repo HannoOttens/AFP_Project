@@ -25,15 +25,15 @@ accountServer = login
 
 -- | Register a user
 register :: RegisterForm -> AppConfig Handler PostRedirectHandler
-register form = trace "account/register" $ do
-    if RM.password form == RM.rpassword form
-    then do
-        success <- liftDbAction $ DB.addUser UM.User { UM.id       = 0,
-                                                UM.username = RM.username form, 
-                                                UM.password = RM.password form }
+register form = trace "account/register" $
+    if RM.password form == RM.rpassword form 
+    then do 
+        success <- liftDbAction $ DB.addUser UM.User { UM.id = 0,
+                                                       UM.username = RM.username form, 
+                                                       UM.password = RM.password form }
         case success of
-         Just _  -> redirect "login.html"
-         Nothing -> redirect "register.html"
+          Just _  -> redirect "login.html"
+          Nothing -> redirect "register.html"
     -- Failed because passwords are not equal
     else redirect "register.html"
 

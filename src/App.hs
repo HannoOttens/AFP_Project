@@ -48,4 +48,5 @@ runApp :: Config -> IO ()
 runApp conf = run 8080 $ app conf
 
 app :: Config -> Application
-app conf = (serveWithContext api (authConf conf) $ hoistServerWithContext api authApi (`runReaderT` conf) server)
+app conf = serveWithContext api (authConf conf) 
+         $ hoistServerWithContext api authApi (`runReaderT` conf) server

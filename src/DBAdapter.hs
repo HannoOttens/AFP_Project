@@ -100,7 +100,7 @@ updateWebsiteHash websiteID newHash conn = do
                   <> "SET Hash = ?, LastUpdate = datetime('now') "
                   <> "WHERE WebsiteID = ?"
 
--- | Check if website hash has changed, returns True if it has changed or website is not found
+-- | Check if any targets related to this website have changed
 checkTargetHash :: WebsiteID -> Hash -> (Connection -> IO Bool)
 checkTargetHash websiteID newHash conn = do 
     result <- query conn checkHash (websiteID, newHash)
