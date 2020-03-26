@@ -1,15 +1,21 @@
+{-|
+Module      : App
+Description : Application manager
+
+Run application and server details.
+-}
 module App where
 
+import Control.Monad.Reader
+import Control.Monad.State
 import Network.Wai.Handler.Warp
 import Servant
 import Servant.Auth.Server
-import Control.Monad.Reader
-import Control.Monad.State
 
-import Handlers.Account
-import Handlers.Targets
-import Handlers.Notification
 import Config
+import Handlers.Account
+import Handlers.Notification
+import Handlers.Targets
 import Models.User
 
 type PublicAPI = LoginAPI 

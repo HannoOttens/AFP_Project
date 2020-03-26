@@ -3,23 +3,21 @@ module TestUtils where
 import Data.Aeson (ToJSON, encode)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB
+import Data.Map.Strict
+import Network.HTTP.Types.Header (Header)
 import Network.HTTP.Types.Method
-import Network.HTTP.Types.Header(Header)
 import Network.Wai
 import Network.Wai.Test hiding (request)
-import Test.Hspec.Wai
-    ( WaiExpectation, WaiSession, matchBody, request
-    , shouldRespondWith, liftIO)
-import Test.Hspec.Wai.Matcher
+import Test.Hspec.Wai (liftIO, matchBody, request, shouldRespondWith, WaiExpectation, WaiSession)
 import Test.Hspec.Wai.Internal
-import Web.FormUrlEncoded
+import Test.Hspec.Wai.Matcher
 import Web.Cookie
-import qualified Data.Map.Strict as Map
+import Web.FormUrlEncoded
 
-import Models.Login
-import Models.Register
-import Models.Notification
 import Models.EditTarget
+import Models.Login
+import Models.Notification
+import Models.Register
 
 -- | Send a POST request with form encoded data to the server
 postForm :: (ToForm a) => ByteString -> a -> WaiSession st SResponse
@@ -36,13 +34,13 @@ shouldRespondWithJson req (expectedStatus, expectedValue) =
                     { matchBody = bodyEquals $ encode expectedValue }
     in shouldRespondWith req matcher
 
-requestWithSession :: LoginForm -> Method -> ByteString -> [Header] -> LB.ByteString-> WaiSession st SResponse
+requestWithSession :: LoginForm -> Method -> ByteString -> [Header] -> LB.ByteString -> WaiSession st SResponse
 requestWithSession login method path headers body = do 
     app <- getApp
     liftIO $ flip runSession app $ do
         srequest $ SRequest (req methodPost header "/login") (urlEncodeAsFormStable login)
         cookie <- getClientCookies
-        let newHeaders = ("X-XSRF-TOKEN", setCookieValue (cookie Map.! "XSRF-TOKEN")) : headers
+        let newHeaders = ("X-XSRF-TOKEN", setCookieValue (cookie ! "XSRF-TOKEN")) : headers
         srequest $ SRequest (req method newHeaders path) body
     where
         req method headers = setPath defaultRequest {requestMethod = method, requestHeaders = headers}

@@ -1,9 +1,8 @@
-
-import System.Cron.Schedule
 import Control.Monad.Reader
+import System.Cron.Schedule
 
-import App
 import qualified DBAdapter as DB
+import App
 import Config
 import Poll
 

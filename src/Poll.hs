@@ -1,17 +1,35 @@
+{-|
+Module      : Poll
+Description : Target polling
+
+Poll all targets from the database, check for changes and notify the user.
+-}
 module Poll where
 
-import Network.HTTP.Client
-import Control.Monad
-import Control.Monad.Reader
-import Data.ByteString.Lazy.Char8(unpack)
+import Control.Monad (mapM_, when)
+import Control.Monad.Reader (asks, liftIO)
+import Data.ByteString.Lazy.Char8 (unpack)
+import Network.HTTP.Client (httpLbs, parseRequest, responseBody)
 
 import qualified DBAdapter as DB
 import Config
-import Notification
-import Scraper
-import Models.Notification(newNotification)
+import Models.Notification (newNotification)
 import Models.Target
 import Models.Website
+import Notification
+import Scraper
+
+type URL = String
+
+-- Poll all targets from the database
+pollTargets :: AppConfig IO ()
+pollTargets = do 
+      ws <- DB.exec DB.getWebsites
+      mapM_ (\w -> do
+            (b, s) <- pollWebsite w
+            when b $ do -- Website changed, continue checking targets
+                  ts <- DB.exec $ DB.getTargetsOnWebsite $ idWebsite w
+                  mapM_ (\t -> pollTarget t w s) ts) ws
 
 -- Poll a website, check for changes, update hash, return site content
 pollWebsite :: Website -> AppConfig IO (Bool, SiteContent)
@@ -24,16 +42,6 @@ pollWebsite w = do
             _ <- DB.exec $ DB.updateWebsiteHash (idWebsite w) h
             return ()
       return (b, site)
-
--- Poll all targets from the database
-pollTargets :: AppConfig IO ()
-pollTargets = do 
-      ws <- DB.exec DB.getWebsites
-      mapM_ (\w -> do
-            (b, s) <- pollWebsite w
-            when b $ do -- Website changed, continue checking targets
-                  ts <- DB.exec $ DB.getTargetsOnWebsite $ idWebsite w
-                  mapM_ (\t -> pollTarget t w s) ts) ws
 
 -- Poll a target
 pollTarget :: Target -> Website -> SiteContent -> AppConfig IO ()

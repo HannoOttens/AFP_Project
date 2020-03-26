@@ -1,14 +1,20 @@
+{-|
+Module      : Notification
+Description : Notification manager
+
+Create and send notifications to the user.
+-}
 module Notification where
 
-import Web.WebPush
-import qualified Data.Text as T
 import Control.Lens
 import Control.Monad
 import Control.Monad.Reader
+import Data.Text (unpack)
+import Web.WebPush
 
 import qualified DBAdapter as DB
-import Models.Notification
 import Config
+import Models.Notification
 
 type PushMsg = PushNotification NotificationMessage
 
@@ -24,7 +30,7 @@ createNotificationDetails userID msg = do
 
 -- | Send all notifications to recipients, if endpoint is not found return endpoint url so it can be removed from database
 sendNotifications :: [PushMsg] -> AppConfig IO [String]
-sendNotifications msgs = map (T.unpack . view pushEndpoint) <$> filterM p msgs
+sendNotifications msgs = map (unpack . view pushEndpoint) <$> filterM p msgs
     where p msg = do keys <- asks vapidKeys
                      man <- asks manager
                      response <- sendPushNotification keys man msg

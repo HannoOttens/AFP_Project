@@ -1,11 +1,17 @@
+{-|
+Module      : Models.Notification
+Description : Notification model
+
+Database model for notifications.
+-}
 module Models.Notification where
 
-import qualified Data.Aeson as A
-import GHC.Generics
+import Data.Aeson
 import Data.Text
-import Database.SQLite.Simple
-import Web.FormUrlEncoded (FromForm)
 import Data.Time
+import Database.SQLite.Simple
+import GHC.Generics
+import Web.FormUrlEncoded (FromForm)
 
 data NotificationMessage = NotificationMessage { 
     title   :: Text, 
@@ -14,7 +20,7 @@ data NotificationMessage = NotificationMessage {
     icon    :: Text
 } deriving (Generic)
 
-instance A.ToJSON NotificationMessage
+instance ToJSON NotificationMessage
 
 
 data Notification = Notification { 
@@ -23,7 +29,7 @@ data Notification = Notification {
     timestamp :: UTCTime 
 } deriving (Generic)
 
-instance A.ToJSON Notification
+instance ToJSON Notification
 instance FromRow Notification where
     fromRow = Notification <$> field <*> field <*> field
 
@@ -37,15 +43,15 @@ data SubscriptionDetails = SubscriptionDetails {
 } deriving (Generic)
 
 instance FromForm SubscriptionDetails
-instance A.ToJSON SubscriptionDetails
+instance ToJSON SubscriptionDetails
 instance FromRow SubscriptionDetails where
     fromRow = SubscriptionDetails <$> field <*> field <*> field <*> field <*> field
 
-data Response = Response { 
+newtype Response = Response { 
     success :: Bool 
  } deriving (Eq, Show, Generic)
 
-instance A.ToJSON Response  
+instance ToJSON Response  
 
 newNotification :: String -> String -> String -> NotificationMessage
 newNotification t b u = NotificationMessage {

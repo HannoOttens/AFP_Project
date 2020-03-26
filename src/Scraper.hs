@@ -1,12 +1,19 @@
+{-|
+Module      : Scraper
+Description : Page scraper
+
+Filter and hash the content based on the given element and optional attribute.
+-}
+
 module Scraper where
 
 import Data.Hashable
 import Text.HTML.TagSoup
 
 type SiteContent = String
-type Selector    = (String, Maybe (Attribute String)) -- Element, optional attribute
-type Nesting     = Int
-newtype Tags     = Tags [Tag String]
+type Selector = (String, Maybe (Attribute String)) -- Element, optional attribute
+type Nesting = Int
+newtype Tags = Tags [Tag String]
 
 instance {-# OVERLAPS #-} Hashable Tags where
     hashWithSalt s (Tags x) = hashWithSalt s (renderTags x)

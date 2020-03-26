@@ -1,14 +1,14 @@
 module LoginTest where
 
+import Data.String(fromString)
 import Network.Wai (Application, Request(..))
 import Network.Wai.Test
 import Test.Hspec (SpecWith, describe, it)
 import Test.Hspec.Wai
-import Data.String(fromString)
 
-import Models.Register
 import Models.Login
 import Models.Notification
+import Models.Register
 
 import TestUtils
 

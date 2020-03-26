@@ -1,21 +1,27 @@
+{-|
+Module      : Handlers.Targets
+Description : Targets handlers
+
+Handlers for targets details.
+-}
 module Handlers.Targets (
     TargetsAPI, targetServer 
 ) where
 
-import Servant
-import Debug.Trace
-import Data.Maybe
 import Control.Monad.Reader
 import Control.Monad.State
+import Data.Maybe
+import Debug.Trace
 import Network.URI (isURI)
+import Servant
 
-import Models.Target as TM
-import Models.FullTarget as FTM
-import Models.EditTarget as ETM
-import Models.Website as WM
-import Models.User as UM
-import Config
 import qualified DBAdapter as DB
+import Config
+import Models.EditTarget as ETM
+import Models.FullTarget as FTM
+import Models.Target as TM
+import Models.User as UM
+import Models.Website as WM
 
 type TargetsAPI = "target" :> (
              "delete" :> QueryParam "id" Int                  :> Get '[JSON] Bool

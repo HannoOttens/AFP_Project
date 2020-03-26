@@ -1,8 +1,14 @@
+{-|
+Module      : Models.Login
+Description : Login model
+
+Database model for login.
+-}
 module Models.Login where
 
+import Data.Aeson
 import GHC.Generics
 import Web.FormUrlEncoded (FromForm)
-import Data.Aeson
 
 -- | Used for logging in
 data LoginForm = LoginForm

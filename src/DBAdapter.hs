@@ -1,20 +1,26 @@
+{-|
+Module      : DBAdapter
+Description : Database manager
+
+Insert, query, delete and update data from the database.
+-}
 module DBAdapter where
 
-import Database.SQLite.Simple
 import Control.Monad.IO.Class
-import Control.Monad.Reader
-import qualified Control.Monad.Trans.Reader as TR
-import Servant
-import Data.String
-import Data.Maybe(listToMaybe)
+import Control.Monad.Reader (lift, unless)
+import Control.Monad.Trans.Reader
 import Data.List.Split
-import qualified Data.Text as T 
+import Data.Maybe (listToMaybe)
+import Data.String
+import Data.Text (unpack)
+import Database.SQLite.Simple
+import Servant
 
-import qualified Models.Website as WM
-import qualified Models.User as UM
-import qualified Models.Target as TM
-import qualified Models.Notification as NM
 import qualified Models.FullTarget as FTM
+import qualified Models.Notification as NM
+import qualified Models.Target as TM
+import qualified Models.User as UM
+import qualified Models.Website as WM
 import Config
 
 type UserID = Int
@@ -27,7 +33,7 @@ type Token = String
 -- | Initialize database with tables if do not already exist
 initDB :: AppConfig IO ()
 initDB = do
-  conf <- TR.ask
+  conf <- ask
   liftIO $ do 
     initQuery <- readFile (initFile conf)
     withConnection (dbFile conf) (\conn -> mapM_ (execute_ conn) $ splitQuery initQuery)
@@ -44,7 +50,7 @@ liftDbAction = mapReaderT liftIO . exec
 -- | Execute an action on the database
 exec :: (Connection -> IO a) -> AppConfig IO a
 exec f = do 
-  file <- TR.asks dbFile
+  file <- asks dbFile
   liftIO $ withConnection file f
 
 isSuccessful :: Connection -> IO Bool
@@ -106,7 +112,7 @@ checkTargetHash websiteID newHash conn = do
                  <> "FROM Targets "
                  <> "WHERE WebsiteID = ? AND Hash = ?"
 
-  -- | Update the hash for the given websiteID
+-- | Update the hash for the given websiteID
 updateTargetHash :: WebsiteID -> Hash -> (Connection -> IO Bool)
 updateTargetHash websiteID newHash conn = do
     execute conn updateHash (newHash, websiteID)
@@ -141,7 +147,7 @@ getUser name conn = do
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
 addToken :: UM.User -> NM.SubscriptionDetails -> (Connection -> IO Bool)
 addToken user sub conn = do
-    b <- doesSubAlreadyExists (UM.id user) (T.unpack $ NM.auth sub) conn 
+    b <- doesSubAlreadyExists (UM.id user) (unpack $ NM.auth sub) conn 
     unless b $ execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
     isSuccessful conn
   where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth, Device, Browser) "

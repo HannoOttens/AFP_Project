@@ -1,15 +1,14 @@
-
+import Control.Monad (when)
+import Data.String (fromString)
+import Database.SQLite.Simple
 import Network.Wai (Application)
+import System.Directory (removeFile, doesFileExist)
 import Test.Hspec (Spec, hspec)
 import Test.Hspec.Wai (with)
-import Database.SQLite.Simple
-import Data.String (fromString)
-import System.Directory (removeFile, doesFileExist)
-import Control.Monad (when)
 
+import qualified DBAdapter as DB
 import App (app)
 import Config
-import qualified DBAdapter as DB
 
 import LoginTest (loginTests)
 import NotificationTest (notificationTests)

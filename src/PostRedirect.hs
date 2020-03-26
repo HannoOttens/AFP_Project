@@ -1,11 +1,16 @@
-{-# LANGUAGE KindSignatures #-}
+{-|
+Module      : PostRedirect
+Description : Redirector for Servant
+
+Location and cookie redirector for Servant.
+-}
 module PostRedirect where
 
 -- Source: https://gist.github.com/alpmestan/757094ecf9401f85c5ba367ca20b8900
+import Control.Monad.Trans (liftIO)
 import GHC.TypeLits
 import Servant
 import Servant.Auth.Server
-import Control.Monad.Trans (liftIO)
 
 import Config
 import Models.User

@@ -1,17 +1,21 @@
+{-|
+Module      : Models.Target
+Description : Target model
+
+Database model for targets.
+-}
 module Models.Target where
 
 import Data.Aeson
 import Database.SQLite.Simple
 import GHC.Generics (Generic)
 
-type Hash = Int
-
 data Target = Target {
     id        :: Int,
     userID    :: Int,
     websiteID :: Int,
     selector  :: Maybe String,  
-    hash      :: Maybe Hash     -- | hash of target content
+    hash      :: Maybe Int     -- ^ hash of target content
 } deriving (Generic, Show)
 
 instance FromRow Target where

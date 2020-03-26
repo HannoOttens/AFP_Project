@@ -1,16 +1,16 @@
 module TargetTest where
 
+import Data.Aeson (decode)
+import Data.String (fromString)
 import Network.Wai (Application, Request(..))
 import Network.Wai.Test
 import Test.Hspec (SpecWith, describe, it, shouldSatisfy)
 import Test.Hspec.Wai
-import Data.String(fromString)
-import Data.Aeson (decode)
 
-import Models.Register
-import Models.Login
 import Models.EditTarget as ETM
 import Models.FullTarget as FTM
+import Models.Login
+import Models.Register
 
 import TestUtils
 

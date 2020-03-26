@@ -1,12 +1,19 @@
+{-|
+Module      : Config
+Description : Configuration manager
+
+Configuration details.
+-}
 module Config where
-import qualified Data.Text as T
-import Control.Monad.Trans.Reader(ReaderT)
-import Control.Monad.Trans.State(StateT)
+
+import Control.Monad.Trans.Reader (ReaderT)
+import Control.Monad.Trans.State (StateT)
+import Data.Text (Text)
+import Network.HTTP.Client
+import Network.HTTP.Client.TLS
 import Servant
 import Servant.Auth.Server
 import Web.WebPush
-import Network.HTTP.Client
-import Network.HTTP.Client.TLS
 
 import Models.User as UM
 
@@ -18,14 +25,14 @@ type AppConfig m = ReaderT Config m
 
 -- | Application configuration
 data Config = Config { 
-      dbFile         :: String, -- | Path to the sqlite database file
-      initFile       :: String, -- | Path to the file containing create table statement
-      pollSchedule   :: T.Text,   -- | CRON-schedule for polling the websites
-      cookieSettings :: CookieSettings, -- | Settings for cookies
-      jwtSettings    :: JWTSettings,    -- | Settings for JWT
-      authConf       :: Context '[CookieSettings, JWTSettings], -- | Combined settings for JWT and cookies
-      vapidKeys      :: VAPIDKeys, -- | representing a unique VAPID key pair for push notifications
-      manager        :: Manager -- | Network connection manager, shared manager between request
+      dbFile         :: String, -- ^ Path to the sqlite database file
+      initFile       :: String, -- ^ Path to the file containing create table statement
+      pollSchedule   :: Text,   -- ^ CRON-schedule for polling the websites
+      cookieSettings :: CookieSettings, -- ^ Settings for cookies
+      jwtSettings    :: JWTSettings,    -- ^ Settings for JWT
+      authConf       :: Context '[CookieSettings, JWTSettings], -- ^ Combined settings for JWT and cookies
+      vapidKeys      :: VAPIDKeys, -- ^ Representing a unique VAPID key pair for push notifications
+      manager        :: Manager -- ^ Network connection manager, shared manager between request
 }
 
 -- | Read/construct config

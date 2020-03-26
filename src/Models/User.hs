@@ -1,9 +1,15 @@
+{-|
+Module      : Models.User
+Description : User model
+
+Database model for users.
+-}
 module Models.User where
 
-import Database.SQLite.Simple
 import Data.Aeson
-import Servant.Auth.Server
+import Database.SQLite.Simple
 import GHC.Generics (Generic)
+import Servant.Auth.Server
 
 data User = User {
     id         :: Int,          

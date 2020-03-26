@@ -1,7 +1,7 @@
 module ScraperTest where
 
-import Test.Hspec (SpecWith, describe, it)
 import Data.Hashable
+import Test.Hspec (SpecWith, describe, it)
 
 import Scraper
 

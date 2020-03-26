@@ -1,17 +1,23 @@
+{-|
+Module      : Handlers.Notification
+Description : Notification handlers
+
+Handlers for notification details.
+-}
 module Handlers.Notification where
 
-import Servant
 import Control.Monad.Reader
 import Control.Monad.State
-import Data.Word (Word8)
 import Data.Maybe
-import Web.WebPush
+import Data.Word (Word8)
 import Debug.Trace
+import Servant
+import Web.WebPush
 
+import qualified DBAdapter as DB 
 import Config
 import Models.Notification as MN
 import Models.User as UM
-import qualified DBAdapter as DB 
 
 type NotificationAPI = "notification" :> (
          "subscribe"     :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 

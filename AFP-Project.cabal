@@ -17,29 +17,30 @@ library
   default-language: Haskell2010
   default-extensions:  
       DataKinds
-    , TypeOperators
-    , OverloadedStrings
     , DeriveGeneric
     , FlexibleContexts
     , FlexibleInstances
+    , KindSignatures
+    , OverloadedStrings
+    , TypeOperators
     , TypeSynonymInstances
   exposed-modules:
-      App
-    , DBAdapter
+      App 
     , Config
-    , Poll
-    , Scraper
+    , DBAdapter
     , Notification
+    , Poll
     , PostRedirect
+    , Scraper
     -- Models
-    , Models.Login
-    , Models.Register
-    , Models.Website
-    , Models.User
-    , Models.Target
-    , Models.FullTarget
     , Models.EditTarget
+    , Models.FullTarget
+    , Models.Login
     , Models.Notification
+    , Models.Register
+    , Models.Target
+    , Models.User
+    , Models.Website
     -- Handlers
     , Handlers.Account
     , Handlers.Clients
@@ -47,120 +48,121 @@ library
     , Handlers.Targets
   build-depends:
       base
-    , servant-server
-    , servant-auth
-    , servant-auth-server
     , aeson
-    , warp
-    , sqlite-simple
-    , hashable
-    , mtl
-    , transformers
-    , http-api-data
-    , time
-    , transformers-base
-    , split
+    , bytestring
     , cron
-    , text
-    , tagsoup
-    , web-push
-    , lens
+    , hashable
+    , http-api-data
     , http-client
     , http-client-tls
-    , bytestring
+    , lens
+    , mtl
     , network-uri
+    , servant-auth
+    , servant-auth-server
+    , servant-server
+    , split
+    , sqlite-simple
+    , tagsoup
+    , text
+    , time
+    , transformers
+    , transformers-base
+    , warp
+    , web-push
 
 executable AFP-Project
   ghc-options:         -Wall
   main-is:             Main.hs
   hs-source-dirs:      src
   default-language:    Haskell2010
+  default-extensions:  
+      DataKinds
+    , DeriveGeneric
+    , FlexibleContexts
+    , FlexibleInstances
+    , KindSignatures
+    , OverloadedStrings
+    , TypeOperators
+    , TypeSynonymInstances
   other-modules:      
       App 
-    , DBAdapter
     , Config
-    , Poll
-    , Scraper
+    , DBAdapter
     , Notification
+    , Poll
     , PostRedirect
+    , Scraper
     -- Models
-    , Models.Login
-    , Models.Register
-    , Models.Website
-    , Models.User
-    , Models.Target
-    , Models.FullTarget
     , Models.EditTarget
+    , Models.FullTarget
+    , Models.Login
     , Models.Notification
+    , Models.Register
+    , Models.Target
+    , Models.User
+    , Models.Website
     -- Handlers
     , Handlers.Account
     , Handlers.Clients
     , Handlers.Notification
     , Handlers.Targets
-  default-extensions:  
-      DataKinds
-    , TypeOperators
-    , OverloadedStrings
-    , DeriveGeneric
-    , FlexibleContexts
-    , FlexibleInstances
-    , TypeSynonymInstances
   build-depends:
       AFP-Project
     , base
-    , servant-server
-    , servant-auth
-    , servant-auth-server
     , aeson
-    , warp
-    , sqlite-simple
-    , hashable
-    , mtl
-    , transformers
-    , http-api-data
-    , time
-    , transformers-base
-    , split
+    , bytestring
     , cron
-    , text
-    , tagsoup
-    , web-push
-    , lens
+    , hashable
+    , http-api-data
     , http-client
     , http-client-tls
-    , bytestring
+    , lens
+    , mtl
     , network-uri
+    , servant-auth
+    , servant-auth-server
+    , servant-server
+    , split
+    , sqlite-simple
+    , tagsoup
+    , text
+    , time
+    , transformers
+    , transformers-base
+    , warp
+    , web-push
 
 test-suite test
   default-language: Haskell2010
+  default-extensions:
+        OverloadedStrings     
   type: exitcode-stdio-1.0
   hs-source-dirs: tests
   main-is: Test.hs
   other-modules:
-        TestUtils
-      , TargetTest
-      , LoginTest
+        LoginTest
       , NotificationTest
       , ScraperTest
-  default-extensions:
-        OverloadedStrings     
+      , TargetTest
+      , TestUtils
   build-depends:
-        base >= 4 && < 5
-      , AFP-Project 
-      , QuickCheck
-      , tasty
-      , tasty-quickcheck
-      , sqlite-simple
-      , hspec
-      , hspec-wai
-      , bytestring
-      , http-types
-      , wai
-      , wai-extra
-      , http-api-data
+        AFP-Project 
+      , base >= 4 && < 5
       , aeson
+      , bytestring
       , cookie
       , containers
       , directory
       , hashable
+      , hspec
+      , hspec-wai
+      , http-api-data
+      , http-types
+      , QuickCheck
+      , sqlite-simple
       , tagsoup
+      , tasty
+      , tasty-quickcheck
+      , wai
+      , wai-extra

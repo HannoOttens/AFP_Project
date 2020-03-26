@@ -1,7 +1,13 @@
+{-|
+Module      : Models.FullTarget
+Description : Full target model
+
+Database model for full targets.
+-}
 module Models.FullTarget where
 
-import Data.Time(UTCTime)
 import Data.Aeson
+import Data.Time (UTCTime)
 import Database.SQLite.Simple
 import GHC.Generics (Generic)
 

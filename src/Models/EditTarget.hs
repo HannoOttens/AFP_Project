@@ -1,3 +1,9 @@
+{-|
+Module      : Models.EditTarget
+Description : Target editing model
+
+Database model for target editing.
+-}
 module Models.EditTarget where
 
 import Data.Aeson

@@ -1,19 +1,25 @@
+{-|
+Module      : Handlers.Account
+Description : Account handlers
+
+Handlers for account details.
+-}
 module Handlers.Account (
     LoginAPI, accountServer 
 ) where
 
+import Control.Monad.Reader (ask)
+import Control.Monad.Trans (liftIO)
+import Debug.Trace
 import Servant
 import Servant.Auth.Server
-import Control.Monad.Trans (liftIO)
-import Control.Monad.Reader (ask)
-import Debug.Trace
 
+import Config
 import DBAdapter as DB
-import Models.Register as RM
 import Models.Login as LM
+import Models.Register as RM
 import Models.User as UM
 import PostRedirect
-import Config
 
 type LoginHeaders a = Headers '[Header "Set-Cookie" SetCookie, Header "Set-Cookie" SetCookie] a
 type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[JSON] (LoginHeaders LM.LoginResponse)
