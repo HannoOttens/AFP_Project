@@ -27,7 +27,7 @@ type ProtectedAPI = TargetsAPI
 type RawFiles = Raw
 -- | Full API type for application
 type API = PublicAPI  
-            :<|> Servant.Auth.Server.Auth '[Cookie] User :> ProtectedAPI
+            :<|> Servant.Auth.Server.Auth '[Cookie] Session :> ProtectedAPI
             :<|> RawFiles
 
 -- | Server instance for serving the raw files
@@ -35,8 +35,8 @@ rawFiles :: ServerT RawFiles (AppConfig Handler)
 rawFiles = serveDirectoryWebApp "www"
 
 -- | Server instance for serving the ProtectedAPI
-protected :: Servant.Auth.Server.AuthResult User -> ServerT ProtectedAPI (AppConfig Handler)    
-protected (Servant.Auth.Server.Authenticated user) = hoistServer protectedAPI (`evalStateT` user) (targetServer :<|> notificationServer)
+protected :: Servant.Auth.Server.AuthResult Session -> ServerT ProtectedAPI (AppConfig Handler)    
+protected (Servant.Auth.Server.Authenticated session) = hoistServer protectedAPI (`evalStateT` (userID session)) (targetServer :<|> notificationServer)
 protected _ = throwAll err401
 
 -- | Server instance for serving the PublicAPI

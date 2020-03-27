@@ -8,8 +8,10 @@ module Handlers.Account (
     LoginAPI, accountServer 
 ) where
 
-import Control.Monad.Reader (ask)
+import Control.Monad.Reader (ask, asks)
 import Control.Monad.Trans (liftIO)
+import Crypto.PasswordStore(makePassword, verifyPassword)
+import Data.ByteString.Char8 (ByteString, pack)
 import Debug.Trace
 import Servant
 import Servant.Auth.Server
@@ -36,10 +38,11 @@ accountServer = login
 register :: RegisterForm -> AppConfig Handler PostRedirectHandler
 register form = trace "account/register" $
     if RM.password form == RM.rpassword form 
-    then do 
+    then do
+        hashedPassword <- hashPassword (RM.password form)
         success <- liftDbAction $ DB.addUser UM.User { UM.id = 0,
                                                        UM.username = RM.username form, 
-                                                       UM.password = RM.password form }
+                                                       UM.password = hashedPassword }
         case success of
           Just _  -> redirect "login.html"
           Nothing -> redirect "register.html"
@@ -51,17 +54,26 @@ login :: LoginForm -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 login form = trace "account/login" $ do
     user <- liftDbAction $ DB.getUser (LM.username form)
     case user of
-        Just u  -> if UM.password u == LM.password form
+        Just u  -> if verifyUser (LM.password form) u
                    then returnLoginSuccess u
                    else throwError err401
         Nothing -> throwError err401
 
 
--- | Return a login succes with the correct Set-Cookie headers
+-- | Return a login success with the correct Set-Cookie headers
 returnLoginSuccess :: User -> AppConfig Handler (LoginHeaders LM.LoginResponse)
 returnLoginSuccess user = do 
   conf <- ask
-  mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
+  mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) (Session $ UM.id user)
   case mApplyCookies of
     Nothing           -> throwError err401
     Just applyCookies -> return . applyCookies $ LM.LoginResponse { loginSuccess = True, redirectTo = "account.html"}
+
+
+hashPassword :: String -> AppConfig Handler ByteString
+hashPassword pass = do 
+    strength <- asks passwordStrength
+    liftIO $ makePassword (pack pass) strength
+
+verifyUser :: String -> User -> Bool
+verifyUser attempt user = verifyPassword (pack attempt) (UM.password user)

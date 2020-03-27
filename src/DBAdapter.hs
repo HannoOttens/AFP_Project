@@ -155,10 +155,10 @@ getUser name conn = do
                   <> "WHERE Username = ?"
 
 -- | Add push notification details to the database, consisting of (endpoint, p256dh, auth)
-addToken :: UM.User -> NM.SubscriptionDetails -> (Connection -> IO Bool)
-addToken user sub conn = do
-    b <- doesSubAlreadyExists (UM.id user) (unpack $ NM.auth sub) conn 
-    unless b $ execute conn insertToken (UM.id user, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
+addToken :: UserID -> NM.SubscriptionDetails -> (Connection -> IO Bool)
+addToken userID sub conn = do
+    b <- doesSubAlreadyExists userID (unpack $ NM.auth sub) conn 
+    unless b $ execute conn insertToken (userID, NM.endpoint sub, NM.hash sub, NM.auth sub, NM.device sub, NM.browser sub)
     isSuccessful conn
   where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth, Device, Browser) "
                    <> "VALUES (?, ?, ?, ?, ?, ?)"

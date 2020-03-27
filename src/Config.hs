@@ -15,24 +15,23 @@ import Servant
 import Servant.Auth.Server
 import Web.WebPush
 
-import Models.User as UM
-
--- | Context with user for protected actions
-type AppContext m = StateT User (AppConfig m)
+-- | Context with userID for protected actions
+type AppContext m = StateT Int (AppConfig m)
 
 -- | Application configuration monad
 type AppConfig m = ReaderT Config m
 
 -- | Application configuration
 data Config = Config { 
-      dbFile         :: String, -- ^ Path to the sqlite database file
-      initFile       :: String, -- ^ Path to the file containing create table statement
-      pollSchedule   :: Text,   -- ^ CRON-schedule for polling the websites
-      cookieSettings :: CookieSettings, -- ^ Settings for cookies
-      jwtSettings    :: JWTSettings,    -- ^ Settings for JWT
-      authConf       :: Context '[CookieSettings, JWTSettings], -- ^ Combined settings for JWT and cookies
-      vapidKeys      :: VAPIDKeys, -- ^ Representing a unique VAPID key pair for push notifications
-      manager        :: Manager -- ^ Network connection manager, shared manager between request
+      dbFile           :: String, -- ^ Path to the sqlite database file
+      initFile         :: String, -- ^ Path to the file containing create table statement
+      pollSchedule     :: Text,   -- ^ CRON-schedule for polling the websites
+      cookieSettings   :: CookieSettings, -- ^ Settings for cookies
+      jwtSettings      :: JWTSettings,    -- ^ Settings for JWT
+      authConf         :: Context '[CookieSettings, JWTSettings], -- ^ Combined settings for JWT and cookies
+      vapidKeys        :: VAPIDKeys, -- ^ Representing a unique VAPID key pair for push notifications
+      manager          :: Manager, -- ^ Network connection manager, shared manager between request
+      passwordStrength :: Int -- ^ Password strength, determines hashing strength for passwords
 }
 
 -- | Read/construct config
@@ -55,7 +54,8 @@ config =
             cookieSettings = cookieSets,
             jwtSettings = jwtSets,
             vapidKeys = vapidKeyPair,
-            manager = connManager
+            manager = connManager,
+            passwordStrength = 20
       }
 
 -- | Read the notification keys from the configuration

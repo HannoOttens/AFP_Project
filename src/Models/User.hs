@@ -7,21 +7,25 @@ Database model for users.
 module Models.User where
 
 import Data.Aeson
+import Data.ByteString
 import Database.SQLite.Simple
 import GHC.Generics (Generic)
 import Servant.Auth.Server
 
--- | User model for updating at retrieving users fromt he database
+newtype Session = Session { userID :: Int } 
+    deriving(Generic)
+
+-- | User model for updating at retrieving users from the database
 data User = User {
     id         :: Int,          
     username   :: String,
-    password   :: String
+    password   :: ByteString
 } deriving (Eq, Generic, Show)
 
 instance FromRow User where
     fromRow = User <$> field <*> field <*> field
 
-instance ToJSON User
-instance ToJWT User
-instance FromJSON User
-instance FromJWT User
+instance ToJSON Session
+instance ToJWT Session
+instance FromJSON Session
+instance FromJWT Session

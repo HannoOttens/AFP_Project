@@ -20,7 +20,6 @@ import Config
 import Models.EditTarget as ETM
 import Models.FullTarget as FTM
 import Models.Target as TM
-import Models.User as UM
 import Models.Website as WM
 
 -- | API for the target area, all listed under 'target/'
@@ -38,7 +37,7 @@ targetServer =  deleteTarget :<|> editTarget :<|> listTargets
 editTarget :: ETM.EditTarget -> AppContext Handler Bool
 editTarget targetModel = trace "target/update" $ do
     -- Only allow users to edit their own targets
-    userId <- gets UM.id
+    userId <- get
     existingTarget <- DB.contextDbAction $ DB.getTarget (ETM.targetID targetModel)
     unless (isNothing existingTarget || userId == TM.userID (fromJust existingTarget)) (throwError err401)
     -- Check if target website is valid url
@@ -66,7 +65,7 @@ deleteTarget targetIdQ = trace "target/delete" $ do
     -- Check if query parameter is there
     unless (isJust targetIdQ) (throwError err404)
     let targetId = fromJust targetIdQ
-    userId <- gets UM.id
+    userId <- get
     target <- DB.contextDbAction $ DB.getTarget targetId
     -- The target might not exists anymore
     unless (isJust target) (throwError err500)
@@ -79,5 +78,5 @@ deleteTarget targetIdQ = trace "target/delete" $ do
 -- | List all target of the current user
 listTargets ::  AppContext Handler [FTM.FullTarget]
 listTargets = trace "target/list" $ do
-    userId <- gets UM.id
+    userId <- get
     DB.contextDbAction $ DB.getTargetsOfUser userId

@@ -17,7 +17,6 @@ import Web.WebPush
 import qualified DBAdapter as DB 
 import Config
 import Models.Notification as MN
-import Models.User as UM
 
 -- | The API type for notifications
 type NotificationAPI = "notification" :> (
@@ -40,8 +39,8 @@ notificationServer = subscribe
 -- | Store subscription details of user
 subscribe :: SubscriptionDetails -> AppContext Handler Response
 subscribe details = trace "notification/subscribe" $ do 
-    user <- get
-    result <- lift $ DB.liftDbAction $ DB.addToken user details
+    userId <- get
+    result <- lift $ DB.liftDbAction $ DB.addToken userId details
     return $ Response result
 
 -- | Get public key of server for notification subscription
@@ -54,7 +53,7 @@ keys = trace "notification/keys" $ do
 -- | Get public key of server for notification subscription
 clients :: AppContext Handler [SubscriptionDetails]
 clients = trace "notification/clients" $ do 
-    userId <- gets UM.id
+    userId <- get
     DB.contextDbAction $ DB.getTokens userId
 
 -- | Client a target from the users list of clients
@@ -63,19 +62,19 @@ deleteClient tokenQ = trace "notification/clientdelete" $ do
     -- Check if query parameter is there
     unless (isJust tokenQ) (throwError err404)
     let token = fromJust tokenQ
-    userId <- gets UM.id
+    userId <- get
     -- Remove the target
     DB.contextDbAction $ DB.deleteToken userId token
 
 -- | Get a list of all previous notifications
 notifications :: AppContext Handler [Notification]
 notifications = trace "notification/list" $ do
-    userId <- gets UM.id
+    userId <- get
     DB.contextDbAction $ DB.getNotificationHistory userId
 
 -- | Clear the entire notification history
 clearHistory :: AppContext Handler Bool
 clearHistory = trace "notification/clearhistory" $ do
-    userId <- gets UM.id
+    userId <- get
     -- Remove the history
     DB.contextDbAction $ DB.deleteNotificationHistory userId

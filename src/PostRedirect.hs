@@ -7,13 +7,11 @@ Location and cookie redirector for Servant.
 module PostRedirect where
 
 -- Source: https://gist.github.com/alpmestan/757094ecf9401f85c5ba367ca20b8900
-import Control.Monad.Trans (liftIO)
 import GHC.TypeLits
 import Servant
 import Servant.Auth.Server
 
 import Config
-import Models.User
 
 -- | Return type for a reqeuest that redirects to another page
 type PostRedirect (code :: Nat) loc
@@ -36,16 +34,3 @@ redirect
   :: String -- ^ The URL to redirect to
   -> AppConfig Handler PostRedirectHandler
 redirect a = return $ addHeader a NoContent
-
--- | Redirect to URL with login cookies
-redirectWithCookie
-  :: Config
-  -> User   -- ^ user to log in
-  -> String -- ^ The URL to redirect to
-  -> AppConfig Handler LoginHandler
-redirectWithCookie conf user a = do
-  mApplyCookies <- liftIO $ acceptLogin (cookieSettings conf) (jwtSettings conf) user
-  case mApplyCookies of
-    Nothing           -> throwError err401
-    Just applyCookies -> return $ addHeader a (applyCookies NoContent)
-   
