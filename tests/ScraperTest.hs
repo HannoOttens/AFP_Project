@@ -15,19 +15,19 @@ scraperTests = do
             scrapePage testHTML == hash testHTML
     describe "scrapeElement" $ do
         it "html" $
-            test ("html", Nothing) "TexthtmlCopyright"
+            test ("html") "TexthtmlCopyright"
         it "div" $
-            test ("div", Nothing) "Texthtml"
+            test ("div") "Texthtml"
         it "h1" $
-            test ("h1", Nothing) "Text"
+            test ("h1") "Text"
         it "tbody" $
-            test ("tbody", Nothing) ""
+            test ("tbody") ""
         it "div (id=test)" $
-            test ("div", Just ("id", "test")) "Text"
+            test ("div#test") "Text"
         it "div (id=ntest)" $
-            test ("div", Just ("id", "ntest")) ""
+            test ("div#ntest") ""
         it "div (nid=test)" $
-            test ("div", Just ("nid", "test")) ""
+            test ("div[nid=test]") ""
 
-test :: Selector -> String -> Bool
+test :: String -> String -> Bool
 test s r = scrapeElement s testHTML == hash r
