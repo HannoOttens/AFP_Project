@@ -23,15 +23,18 @@ import Models.Target as TM
 import Models.User as UM
 import Models.Website as WM
 
+-- | API for the target area, all listed under 'target/'
 type TargetsAPI = "target" :> (
              "delete" :> QueryParam "id" Int                  :> Get '[JSON] Bool
         :<|> "update" :> ReqBody '[FormUrlEncoded] EditTarget :> Post '[JSON] Bool
         :<|> "list"                                           :> Get '[JSON] [FTM.FullTarget]
     )
 
+-- | The server instance for the TargetsAPI
 targetServer :: ServerT TargetsAPI (AppContext Handler)
 targetServer =  deleteTarget :<|> editTarget :<|> listTargets
 
+-- | Change or create a target
 editTarget :: ETM.EditTarget -> AppContext Handler Bool
 editTarget targetModel = trace "target/update" $ do
     -- Only allow users to edit their own targets
@@ -57,6 +60,7 @@ editTarget targetModel = trace "target/update" $ do
         0 -> DB.contextDbAction $ DB.addTarget target
         _ -> DB.contextDbAction $ DB.editTarget target
 
+-- | Remove a target from the database
 deleteTarget :: Maybe Int -> AppContext Handler Bool
 deleteTarget targetIdQ = trace "target/delete" $ do
     -- Check if query parameter is there
@@ -72,6 +76,7 @@ deleteTarget targetIdQ = trace "target/delete" $ do
     -- Remove the target
     DB.contextDbAction $ DB.removeTarget targetId
 
+-- | List all target of the current user
 listTargets ::  AppContext Handler [FTM.FullTarget]
 listTargets = trace "target/list" $ do
     userId <- gets UM.id

@@ -19,6 +19,7 @@ import Config
 import Models.Notification as MN
 import Models.User as UM
 
+-- | The API type for notifications
 type NotificationAPI = "notification" :> (
          "subscribe"     :> ReqBody '[FormUrlEncoded] SubscriptionDetails :> Post '[JSON] Response 
     :<|> "keys"                                                           :> Get  '[JSON] [Word8]
@@ -27,6 +28,7 @@ type NotificationAPI = "notification" :> (
     :<|> "list"                                                           :> Get  '[JSON] [Notification]
     :<|> "clearhistory"                                                   :> Get  '[JSON] Bool)
 
+-- | The server instance for the NotificationAPI
 notificationServer :: ServerT NotificationAPI (AppContext Handler)
 notificationServer = subscribe
                 :<|> keys
@@ -65,12 +67,13 @@ deleteClient tokenQ = trace "notification/clientdelete" $ do
     -- Remove the target
     DB.contextDbAction $ DB.deleteToken userId token
 
-
+-- | Get a list of all previous notifications
 notifications :: AppContext Handler [Notification]
 notifications = trace "notification/list" $ do
     userId <- gets UM.id
     DB.contextDbAction $ DB.getNotificationHistory userId
 
+-- | Clear the entire notification history
 clearHistory :: AppContext Handler Bool
 clearHistory = trace "notification/clearhistory" $ do
     userId <- gets UM.id

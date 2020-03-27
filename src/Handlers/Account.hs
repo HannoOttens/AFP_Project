@@ -21,10 +21,13 @@ import Models.Register as RM
 import Models.User as UM
 import PostRedirect
 
+-- | Type synonym for set-cookie headers
 type LoginHeaders a = Headers '[Header "Set-Cookie" SetCookie, Header "Set-Cookie" SetCookie] a
+-- | The account API
 type LoginAPI = "login"    :> ReqBody '[FormUrlEncoded] LoginForm    :> Post '[JSON] (LoginHeaders LM.LoginResponse)
            :<|> "register" :> ReqBody '[FormUrlEncoded] RegisterForm :> PostRedirect 301 String
 
+-- | The server instance for the LoginAPI
 accountServer :: ServerT LoginAPI (AppConfig Handler)
 accountServer = login 
            :<|> register 

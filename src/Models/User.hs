@@ -11,6 +11,7 @@ import Database.SQLite.Simple
 import GHC.Generics (Generic)
 import Servant.Auth.Server
 
+-- | User model for updating at retrieving users fromt he database
 data User = User {
     id         :: Int,          
     username   :: String,

@@ -10,6 +10,7 @@ import Data.Aeson
 import Database.SQLite.Simple
 import GHC.Generics (Generic)
 
+-- | Database model for saving and retrieving targets
 data Target = Target {
     id        :: Int,
     userID    :: Int,

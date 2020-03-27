@@ -58,6 +58,7 @@ config =
             manager = connManager
       }
 
+-- | Read the notification keys from the configuration
 readVapidDetails :: IO VAPIDKeysMinDetails
 readVapidDetails = do
       file <- readFile "vapid.txt"

@@ -1,3 +1,9 @@
+{-| Module      : Models.Register
+    Description : Registration models
+
+    Form model for account registration.
+-}
+
 module Models.Register where
 
 import GHC.Generics

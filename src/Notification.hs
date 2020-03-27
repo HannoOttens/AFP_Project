@@ -16,8 +16,10 @@ import qualified DBAdapter as DB
 import Config
 import Models.Notification
 
+-- | Type synonym for PushNotification NotificationMessage
 type PushMsg = PushNotification NotificationMessage
 
+-- | Create a new pushmessage to send to a specific user
 newPushNotification :: NotificationMessage -> SubscriptionDetails -> PushMsg
 newPushNotification msg sub = set pushMessage msg notification
     where notification = mkPushNotification (endpoint sub) (hash sub) (auth sub)

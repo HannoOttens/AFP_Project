@@ -43,7 +43,6 @@ library
     , Models.Website
     -- Handlers
     , Handlers.Account
-    , Handlers.Clients
     , Handlers.Notification
     , Handlers.Targets
   build-depends:
@@ -104,7 +103,6 @@ executable AFP-Project
     , Models.Website
     -- Handlers
     , Handlers.Account
-    , Handlers.Clients
     , Handlers.Notification
     , Handlers.Targets
   build-depends:

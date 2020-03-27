@@ -23,11 +23,17 @@ import qualified Models.User as UM
 import qualified Models.Website as WM
 import Config
 
+-- | UserID type synonym
 type UserID = Int
+-- | WebsiteID type synonym
 type WebsiteID = Int
+-- | TargetID type synonym
 type TargetID = Int
+-- | URL type synonym
 type URL = String
+-- | Hash type synonym
 type Hash = Int
+-- | Token type synonym
 type Token = String
 
 -- | Initialize database with tables if do not already exist
@@ -38,12 +44,15 @@ initDB = do
     initQuery <- readFile (initFile conf)
     withConnection (dbFile conf) (\conn -> mapM_ (execute_ conn) $ splitQuery initQuery)
 
+-- | Split a multi-statement query into separate parts
 splitQuery :: String -> [Query]
 splitQuery = map fromString . splitOn ";"
 
+-- | Execute a DB action in an AppContext action
 contextDbAction :: (Connection -> IO a) -> AppContext Handler a
 contextDbAction = lift . liftDbAction
 
+-- | Execute a DB action in an AppConfig action
 liftDbAction :: (Connection -> IO a) -> AppConfig Handler a
 liftDbAction = mapReaderT liftIO . exec
 
@@ -53,6 +62,7 @@ exec f = do
   file <- asks dbFile
   liftIO $ withConnection file f
 
+-- | Check if query result returns more than one rowi
 isSuccessful :: Connection -> IO Bool
 isSuccessful = fmap (>= 1) . changes
 
@@ -153,6 +163,7 @@ addToken user sub conn = do
   where insertToken = "INSERT INTO NotificationTokens (UserID, Endpoint, P256dh, Auth, Device, Browser) "
                    <> "VALUES (?, ?, ?, ?, ?, ?)"
 
+-- | Check if a device has already been subscribed with this device
 doesSubAlreadyExists :: UserID -> Token -> (Connection -> IO Bool)
 doesSubAlreadyExists userId authToken conn = do
     result <- query conn lookupToken (userId, authToken)
@@ -176,6 +187,7 @@ getTokens userID conn = query conn lookupTokens (Only userID)
                     <> "FROM NotificationTokens "
                     <> "WHERE UserID = ?"
 
+-- | Save a notification in the database
 addNotification :: UserID -> WebsiteID -> String -> (Connection -> IO ())
 addNotification userID websiteID msg conn =
       execute conn insertNotification (userID, websiteID, msg)
