@@ -10,39 +10,55 @@ module Scraper where
 import Data.Hashable
 import Text.HTML.TagSoup
 import Text.HTML.TagSoup.Selection
+import Text.HTML.TagSoup.Tree
+import Debug.Trace
+import Control.Applicative
 
 -- | Type synonym for String
 type SiteContent = String
 -- | Type synonym for Int
 type Nesting = Int
--- | Newtype for string tag lists
-newtype Tags = Tags [Tag String]
-instance {-# OVERLAPS #-} Hashable Tags where
-    hashWithSalt s (Tags x) = hashWithSalt s (renderTags x)
 
 -- | Return full site content
 scrapePage :: SiteContent -> Int
 scrapePage = hash
 
--- | Return all text within an element and optional attribute
-scrapeElement :: String -> SiteContent -> Int
-scrapeElement s site = hash . Tags . filterTags s $ parseTags site
+-- | Scrape to find the element hash
+scrapeElementHash :: String -> SiteContent -> Int
+scrapeElementHash sel site = hash $ scrapeElementText sel site
 
--- | Introduce nesting
-filterTags :: String -> [Tag String] -> [Tag String]
-filterTags = filterTags' 0
+-- | Scrape element text
+scrapeElementText :: String -> SiteContent -> String
+scrapeElementText sel site = foldl fTags "" $ scrapeElement sel site
+
+-- | Fold tag function
+fTags :: String -> Tag String -> String
+fTags c x = case renderTags [x] of
+                "" -> c
+                xs -> c ++ (if c == "" then "" else "\n") ++ xs 
+
+-- | Return all text within an element and optional attribute
+scrapeElement :: String -> SiteContent -> [Tag String]
+scrapeElement s site = 
+    let selector = parseSelector s
+        tagSoup  = parseTags site
+        tagTrees = tagTree' tagSoup
+    in case firstResult tagTrees selector of
+        Nothing  -> []
+        Just res -> filterTags $ flattenTree [res]
+
+-- | Scrape to find the first result matching the selector
+firstResult :: [TagTree String] -> Either a Selector -> Maybe (TagTree String) 
+firstResult []      _         = Nothing
+firstResult _       (Left _)  = Nothing
+firstResult (x:xs)  (Right s) = case select s x of
+                                  [] -> firstResult xs (Right s)
+                                  rs -> Just . content $ head rs
 
 -- | Filter tags such that they match the given element and/or attribute, counter to find nested elements with the same tag
-filterTags' :: Nesting -> String -> [Tag String] -> [Tag String]
-filterTags' _ _ []          = []
-filterTags' 0 s      (t:ts) = filterTags' (enter s t) s ts                           -- Check if nesting is increased
-filterTags' n s (t:ts) | isTagText        t = t : filterTags' n       s ts -- Only text tags are relevant for site content
-                       | isTagOpenName  s t =     filterTags' (n + 1) s ts -- <e>, increase nesting level
-                       | isTagCloseName s t =     filterTags' (n - 1) s ts -- </e>, reduce nesting level, end collecting if nesting is 0
-                       | otherwise          =     filterTags' n       s ts -- Go to next tag
+filterTags :: [Tag String] -> [Tag String]
+filterTags []     =  []
+filterTags (t:ts) | isTagText t = t : filterTags ts 
+                  | otherwise   =     filterTags ts 
 
--- | Determine whether the given element has been entered or not
-enter :: String -> Tag String -> Nesting
-enter s t = fromEnum $ isTagOpenName s t                        -- <e>
--- enter (e, Just (k, v)) t = fromEnum $ isTagOpenName e t && v == fromAttrib k t -- <e k = v>
 

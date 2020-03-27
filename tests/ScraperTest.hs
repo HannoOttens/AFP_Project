@@ -13,11 +13,11 @@ scraperTests = do
     describe "scrapePage" $
         it "test" $
             scrapePage testHTML == hash testHTML
-    describe "scrapeElement" $ do
+    describe "scrapeElementHash" $ do
         it "html" $
-            test ("html") "TexthtmlCopyright"
+            test ("html") "Text\nhtml\nCopyright"
         it "div" $
-            test ("div") "Texthtml"
+            test ("div") "Text\nhtml"
         it "h1" $
             test ("h1") "Text"
         it "tbody" $
@@ -30,4 +30,4 @@ scraperTests = do
             test ("div[nid=test]") ""
 
 test :: String -> String -> Bool
-test s r = scrapeElement s testHTML == hash r
+test s r = scrapeElementHash s testHTML == hash r
