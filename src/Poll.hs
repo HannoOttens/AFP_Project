@@ -19,6 +19,7 @@ import Models.Website
 import Notification
 import Scraper
 
+-- | Type synonym for String
 type URL = String
 
 -- | Poll all targets from the database
