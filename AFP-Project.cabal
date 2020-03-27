@@ -63,6 +63,7 @@ library
     , split
     , sqlite-simple
     , tagsoup
+    , tagsoup-selection
     , text
     , time
     , transformers
@@ -124,6 +125,7 @@ executable AFP-Project
     , split
     , sqlite-simple
     , tagsoup
+    , tagsoup-selection
     , text
     , time
     , transformers

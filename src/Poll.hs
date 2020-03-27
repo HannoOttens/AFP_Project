@@ -25,6 +25,7 @@ type URL = String
 -- | Poll all targets from the database
 pollTargets :: AppConfig IO ()
 pollTargets = do 
+      _  <- DB.exec DB.removeUnusedWebsites
       ws <- DB.exec DB.getWebsites
       mapM_ (\w -> do
             (b, s) <- pollWebsite w
@@ -52,7 +53,7 @@ pollTarget t w s = case selector t of
       -- Specified target, check if that has changed
       (Just e) -> do 
             liftIO $ putStrLn $ "Polling " ++ url w ++ " with target " ++ e
-            let h = scrapeElement (e, Nothing) s 
+            let h = scrapeElement e s 
             b <- DB.exec $ DB.checkTargetHash (idWebsite w) h
             when b $ do -- Target changed, update hash, notify user
                   _ <- DB.exec $ DB.updateTargetHash (idWebsite w) h

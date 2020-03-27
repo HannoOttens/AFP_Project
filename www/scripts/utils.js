@@ -42,7 +42,7 @@ function getList(url, target, idField, columns, editable) {
                         if (hd.field) {
                             let val = itm[hd.field];
                             if (hd.templater) val = hd.templater(val);
-                            html += '<td data-value="' + val
+                            html += '<td data-value="' + (itm[hd.field] || "")
                                 + '" data-field="' + hd.field
                                 + '" data-editable="' + !!hd.editable
                                 + '" data-required="' + !!hd.required
@@ -120,6 +120,6 @@ function toDate(utcDateTime) {
 
 /** If no selector is given, display 'no selector' */
 function toSelector(value) {
-    return value !== null ? value : "No selector" 
+    return value !== null ? value : "<i>No selector</i>" 
 }
 

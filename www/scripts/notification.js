@@ -19,12 +19,12 @@ function subscribe() {
     .then(postSubscription)
     .then(function (response) {
         if (response.success) {
-            bindClientList();
             alert("Successfully subscribed!");
+            bindClientList();
         }
         else throw new Error("You are already subscribed");
     })
-    .catch(err => alert(err));
+    .catch(err => alert("Failed to subscribe, try again later."));
 }
 
 // Get public key of server to register service worker
