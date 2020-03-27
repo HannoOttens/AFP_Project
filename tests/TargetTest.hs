@@ -85,13 +85,13 @@ loginForm2 :: LoginForm
 loginForm2 = LoginForm "test2" "password2"
 
 target1 :: EditTarget
-target1 = EditTarget 0 "website1" Nothing
+target1 = EditTarget 0 "http://website1.com" Nothing
 
 target2 :: EditTarget
-target2 = EditTarget 1 "website2" (Just "selector")
+target2 = EditTarget 1 "http://website2.com" (Just "selector")
 
 target3 :: EditTarget
-target3 = EditTarget 100 "website2" (Just "selector")
+target3 = EditTarget 100 "http://website3.com" (Just "selector")
 
 target4 :: EditTarget
-target4 = EditTarget 0 "website3" (Just "selector3")
+target4 = EditTarget 0 "http://website3.com" (Just "selector3")
