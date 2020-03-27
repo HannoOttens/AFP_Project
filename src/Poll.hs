@@ -21,7 +21,7 @@ import Scraper
 
 type URL = String
 
--- Poll all targets from the database
+-- | Poll all targets from the database
 pollTargets :: AppConfig IO ()
 pollTargets = do 
       ws <- DB.exec DB.getWebsites
@@ -31,7 +31,7 @@ pollTargets = do
                   ts <- DB.exec $ DB.getTargetsOnWebsite $ idWebsite w
                   mapM_ (\t -> pollTarget t w s) ts) ws
 
--- Poll a website, check for changes, update hash, return site content
+-- | Poll a website, check for changes, update hash, return site content
 pollWebsite :: Website -> AppConfig IO (Bool, SiteContent)
 pollWebsite w = do
       liftIO $ putStrLn $ "Polling " ++ url w
@@ -43,7 +43,7 @@ pollWebsite w = do
             return ()
       return (b, site)
 
--- Poll a target
+-- | Poll a target
 pollTarget :: Target -> Website -> SiteContent -> AppConfig IO ()
 pollTarget t w s = case selector t of
       -- Full website as target, has already been checked, notify user
@@ -57,14 +57,14 @@ pollTarget t w s = case selector t of
                   _ <- DB.exec $ DB.updateTargetHash (idWebsite w) h
                   notify (userID t) w $ "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
 
--- Return site as string
+-- | Return site as string
 getSite :: URL -> AppConfig IO String
 getSite u = do man <- asks manager
                req <- liftIO $ parseRequest u
                response <- liftIO $ httpLbs req man
                return . unpack $ responseBody response
 
--- Create a notification
+-- | Create a notification
 notify :: Int -> Website -> String -> AppConfig IO ()
 notify user site msg = do
       n <- createNotificationDetails user $ newNotification (url site) msg (url site)
