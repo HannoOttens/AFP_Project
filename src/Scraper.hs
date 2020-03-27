@@ -6,8 +6,8 @@ Filter and hash the content based on the given element and optional attribute.
 -}
 module Scraper where
 
-import Control.Applicative
 import Data.Hashable
+import Data.List (intercalate)
 import Text.HTML.TagSoup
 import Text.HTML.TagSoup.Selection
 import Text.HTML.TagSoup.Tree
@@ -29,15 +29,7 @@ scrapeElementHash sel site = hash $ scrapeElementText sel site
 
 -- | Scrape the tags and convert to string
 scrapeElementText :: Element -> SiteContent -> String
-scrapeElementText sel site = foldl fTags "" $ scrapeElement sel site
-
--- | Fold tags into string
-fTags :: String -> Tag String -> String
-fTags c x = case renderTags [x] of
-                "" -> c
-                xs -> case c of
-                    "" -> xs
-                    _  -> c ++ "\n" ++ xs
+scrapeElementText sel site = intercalate "\n" $ map fromTagText $ scrapeElement sel site
 
 -- | Return all text within an element and optional attribute
 scrapeElement :: Element -> SiteContent -> [Tag String]
@@ -53,5 +45,5 @@ firstResult :: [TagTree String] -> Either a Selector -> Maybe (TagTree String)
 firstResult []     _         = Nothing
 firstResult _      (Left  _) = Nothing
 firstResult (x:xs) (Right s) = case select s x of
-                                  []     -> firstResult xs (Right s)
-                                  (r:rs) -> Just . content $ r
+                                  []    -> firstResult xs (Right s)
+                                  (r:_) -> Just . content $ r
