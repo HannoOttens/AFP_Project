@@ -25,7 +25,11 @@ scrapePage = hash
 
 -- | Scrape to find the element hash
 scrapeElementHash :: Element -> SiteContent -> Hash
-scrapeElementHash sel site = hash $ foldl fTags "" $ scrapeElement sel site
+scrapeElementHash sel site = hash $ scrapeElementText sel site
+
+-- | Scrape the tags and convert to string
+scrapeElementText :: Element -> SiteContent -> String
+scrapeElementText sel site = foldl fTags "" $ scrapeElement sel site
 
 -- | Fold tags into string
 fTags :: String -> Tag String -> String
