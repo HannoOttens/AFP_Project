@@ -38,8 +38,8 @@ filterTags' :: Nesting -> Selector -> [Tag String] -> [Tag String]
 filterTags' _ _ []          = []
 filterTags' 0 s      (t:ts) = filterTags' (enter s t) s ts                           -- Check if nesting is increased
 filterTags' n s (t:ts) | isTagText        t = t : filterTags' n       s ts -- Only text tags are relevant for site content
-                       | isTagOpenName  e t =     filterTags' (n + 1) s ts -- <e>, increase nesting level
-                       | isTagCloseName e t =     filterTags' (n - 1) s ts -- </e>, reduce nesting level, end collecting if nesting is 0
+                       | isTagOpenName  s t =     filterTags' (n + 1) s ts -- <e>, increase nesting level
+                       | isTagCloseName s t =     filterTags' (n - 1) s ts -- </e>, reduce nesting level, end collecting if nesting is 0
                        | otherwise          =     filterTags' n       s ts -- Go to next tag
 
 -- | Determine whether the given element has been entered or not
