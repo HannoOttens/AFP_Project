@@ -64,21 +64,23 @@ pollTarget t w s = case TM.selector t of
              -- Target changed? update hash, notify user
             when changed $ do
                   _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
-                  let old  = splitOn "\n" $ TM.content t
-                      new  = splitOn "\n" text
-                      diff = intercalate "\n" $ diffTarget old new
                   _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
-                  notify (TM.userID t) w diff
+                  let d = diff "\n" (diff "." (\a b -> a ++ " -> " ++ b)) (TM.content t) text
+                  notify (TM.userID t) w d
 
 -- | Get the difference as a pretty printed string
-diffTarget :: [String] -> [String] -> [String]
-diffTarget []     []     = []
-diffTarget as     []     = map (++ " has been removed") as
-diffTarget []     bs     = map (++ " has been added")   bs
-diffTarget (a:as) (b:bs) | a == b || a `elem` bs && b `elem` as     = diffTarget as     bs     -- No change or lines switched
-                         | a `elem` bs = (b ++ " has been added")   : diffTarget (a:as) bs     -- b added
-                         | b `elem` as = (a ++ " has been removed") : diffTarget as     (b:bs) -- a removed
-                         | otherwise   = (a ++ " -> " ++ b)         : diffTarget as     bs     -- a changed to b
+diff :: String -> (String -> String -> String) -> String -> String -> String
+diff s f a b = intercalate "\n" $ diffTarget f (splitOn s a) (splitOn s b)
+
+-- | Check for differences between two lists
+diffTarget :: (String -> String -> String) -> [String] -> [String] -> [String]
+diffTarget _ []     []     = []
+diffTarget _ as     []     = map (++ " has been removed") as
+diffTarget _ []     bs     = map (++ " has been added")   bs
+diffTarget f (a:as) (b:bs) | a == b      =                              diffTarget f as     bs     -- No change
+                           | a `elem` bs = (b ++ " has been added")   : diffTarget f (a:as) bs     -- b added
+                           | b `elem` as = (a ++ " has been removed") : diffTarget f as     (b:bs) -- a removed
+                           | otherwise   = f a b                      : diffTarget f as     bs     -- a changed to b
 
 -- | Return site as string
 getSite :: URL -> AppConfig IO String
