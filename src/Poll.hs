@@ -8,6 +8,7 @@ module Poll where
 
 import Control.Monad (mapM_, when)
 import Control.Monad.Reader (asks, liftIO)
+import Data.Algorithm.Diff
 import Data.ByteString.Lazy.Char8 (unpack)
 import Network.HTTP.Client (httpLbs, parseRequest, responseBody)
 

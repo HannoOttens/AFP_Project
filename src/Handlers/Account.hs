@@ -10,7 +10,7 @@ module Handlers.Account (
 
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.Trans (liftIO)
-import Crypto.PasswordStore(makePassword, verifyPassword)
+import Crypto.PasswordStore (makePassword, verifyPassword)
 import Data.ByteString.Char8 (ByteString, pack)
 import Debug.Trace
 import Servant

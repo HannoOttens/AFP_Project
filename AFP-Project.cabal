@@ -46,10 +46,11 @@ library
     , Handlers.Notification
     , Handlers.Targets
   build-depends:
-      base
-    , aeson
+      aeson
+    , base
     , bytestring
     , cron
+    , Diff
     , hashable
     , http-api-data
     , http-client
@@ -57,6 +58,7 @@ library
     , lens
     , mtl
     , network-uri
+    , pwstore-fast
     , servant-auth
     , servant-auth-server
     , servant-server
@@ -108,10 +110,11 @@ executable AFP-Project
     , Handlers.Targets
   build-depends:
       AFP-Project
-    , base
     , aeson
+    , base
     , bytestring
     , cron
+    , Diff
     , hashable
     , http-api-data
     , http-client
@@ -119,6 +122,7 @@ executable AFP-Project
     , lens
     , mtl
     , network-uri
+    , pwstore-fast
     , servant-auth
     , servant-auth-server
     , servant-server
