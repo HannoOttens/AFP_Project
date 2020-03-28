@@ -226,7 +226,7 @@ deleteNotificationHistory userId conn = do
 getTargetsOnWebsite :: WebsiteID -> (Connection -> IO [TM.Target]) 
 getTargetsOnWebsite websiteID conn = 
     query conn lookupTargets (Only websiteID)
-  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector, Hash "
+  where lookupTargets = "SELECT TargetID, UserID, WebsiteID, Selector, Hash, Content "
                      <> "FROM Targets "
                      <> "WHERE websiteID = ?"
 

@@ -58,15 +58,15 @@ pollTarget t w s = case selector t of
       -- Specified target, check if that has changed
       (Just e) -> do 
             liftIO $ putStrLn $ "Polling " ++ url w ++ " with target " ++ e
-            let lines = scrapeElementLines e s
-                text  = intercalate "\n" lines
-                hsh   = DH.hash text
+            let lins = scrapeElementLines e s
+                text = intercalate "\n" lins
+                hsh  = DH.hash text
             changed <- DB.exec $ DB.checkTargetHash (TM.id t) hsh
              -- Target changed? update hash, notify user
             when changed $ do
                   _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
                   let cl = splitOn "\n" $ content t
-                      d  = diffTarget cl lines
+                      d  = diffTarget cl lins
                   _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
                   notify (userID t) w d -- "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
 
