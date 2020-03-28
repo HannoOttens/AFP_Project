@@ -75,8 +75,7 @@ diffTarget :: [String] -> [String] -> [String]
 diffTarget []     []     = []
 diffTarget as     []     = map (++ " has been removed") as
 diffTarget []     bs     = map (++ " has been added")   bs
-diffTarget (a:as) (b:bs) | a == b                                   = diffTarget as     bs     -- No change
-                         | a `elem` bs && b `elem` as               = diffTarget as bs         -- Lines switched, catch next time
+diffTarget (a:as) (b:bs) | a == b || a `elem` bs && b `elem` as     = diffTarget as     bs     -- No change or lines switched
                          | a `elem` bs = (b ++ " has been added")   : diffTarget (a:as) bs     -- b added
                          | b `elem` as = (a ++ " has been removed") : diffTarget as     (b:bs) -- a removed
                          | otherwise   = (a ++ " -> " ++ b)         : diffTarget as     bs     -- a changed to b
