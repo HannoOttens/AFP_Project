@@ -1,5 +1,6 @@
 module ScraperTest where
 
+import Data.List (intercalate)
 import Test.Hspec (SpecWith, describe, it)
 
 import Scraper
@@ -26,4 +27,4 @@ scraperTests = do
             test "div[nid=test]" ""
 
 test :: String -> String -> Bool
-test s r = scrapeElementText s testHTML == r
+test s r = intercalate "n" (scrapeElementText s testHTML) == r

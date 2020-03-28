@@ -36,7 +36,7 @@ rawFiles = serveDirectoryWebApp "www"
 
 -- | Server instance for serving the ProtectedAPI
 protected :: Servant.Auth.Server.AuthResult Session -> ServerT ProtectedAPI (AppConfig Handler)    
-protected (Servant.Auth.Server.Authenticated session) = hoistServer protectedAPI (`evalStateT` (userID session)) (targetServer :<|> notificationServer)
+protected (Servant.Auth.Server.Authenticated session) = hoistServer protectedAPI (`evalStateT` userID session) (targetServer :<|> notificationServer)
 protected _ = throwAll err401
 
 -- | Server instance for serving the PublicAPI
