@@ -32,6 +32,7 @@ Create Table If Not Exists Targets (
 	WebsiteID Integer Not Null,
 	Selector Text,
 	Hash Integer,
+	Content Text,
 	ShareURL Text, -- For a possible sharing feature
 	Primary Key (TargetID),
 	Foreign Key (UserID) References Users (UserID),

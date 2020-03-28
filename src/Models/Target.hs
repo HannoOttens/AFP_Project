@@ -15,12 +15,13 @@ data Target = Target {
     id        :: Int,
     userID    :: Int,
     websiteID :: Int,
-    selector  :: Maybe String,  
-    hash      :: Maybe Int     -- ^ hash of target content
+    selector  :: Maybe String,
+    hash      :: Maybe Int,     -- ^ hash of target content
+    content   :: String
 } deriving (Generic, Show)
 
 instance FromRow Target where
-    fromRow = Target <$> field <*> field <*> field <*> field <*> field
+    fromRow = Target <$> field <*> field <*> field <*> field <*> field <*> field 
 instance ToRow Target where
     toRow t = toRow (userID t, websiteID t, selector t, hash t)
 instance ToJSON Target

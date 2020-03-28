@@ -9,14 +9,18 @@ module Poll where
 import Control.Monad (mapM_, when)
 import Control.Monad.Reader (asks, liftIO)
 import Data.Algorithm.Diff
+import Data.Algorithm.DiffOutput
 import Data.ByteString.Lazy.Char8 (unpack)
+import Data.Hashable as DH
+import Data.List (intercalate)
 import Network.HTTP.Client (httpLbs, parseRequest, responseBody)
+import Data.List.Split
 
 import qualified DBAdapter as DB
 import Config
 import Models.Notification (newNotification)
-import Models.Target
-import Models.Website
+import Models.Target as TM
+import Models.Website as WM
 import Notification
 import Scraper
 
@@ -54,11 +58,21 @@ pollTarget t w s = case selector t of
       -- Specified target, check if that has changed
       (Just e) -> do 
             liftIO $ putStrLn $ "Polling " ++ url w ++ " with target " ++ e
-            let h = scrapeElementHash e s
-            b <- DB.exec $ DB.checkTargetHash (idWebsite w) h
-            when b $ do -- Target changed, update hash, notify user
-                  _ <- DB.exec $ DB.updateTargetHash (idWebsite w) h
-                  notify (userID t) w $ "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
+            let lines = scrapeElementLines e s
+                text  = intercalate "\n" lines
+                hsh   = DH.hash text
+            changed <- DB.exec $ DB.checkTargetHash (TM.id t) hsh
+             -- Target changed? update hash, notify user
+            when changed $ do
+                  _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
+                  let cl = splitOn "\n" $ content t
+                      d  = diffTarget cl lines
+                  _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
+                  notify (userID t) w d -- "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
+
+-- | Get the difference as a pretty printed string
+diffTarget :: [String] -> [String] -> String
+diffTarget a b = ppDiff $ getGroupedDiff a b
 
 -- | Return site as string
 getSite :: URL -> AppConfig IO String
@@ -74,3 +88,4 @@ notify user site msg = do
       DB.exec $ DB.addNotification user (idWebsite site) msg
       _ <- sendNotifications n
       return ()
+

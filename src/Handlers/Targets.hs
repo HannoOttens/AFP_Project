@@ -53,7 +53,8 @@ editTarget targetModel = trace "target/update" $ do
                            , TM.userID = userId
                            , TM.websiteID = websiteId
                            , TM.selector = ETM.selector targetModel
-                           , TM.hash = Nothing }
+                           , TM.hash = Nothing
+                           , TM.content = "" }
     -- Insert or update depending on the posted ID
     case ETM.targetID targetModel of
         0 -> DB.contextDbAction $ DB.addTarget target

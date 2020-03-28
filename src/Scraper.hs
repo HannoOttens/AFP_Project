@@ -29,7 +29,11 @@ scrapeElementHash sel site = hash $ scrapeElementText sel site
 
 -- | Scrape the tags and convert to string
 scrapeElementText :: Element -> SiteContent -> String
-scrapeElementText sel site = intercalate "\n" $ map fromTagText $ scrapeElement sel site
+scrapeElementText sel site = intercalate "\n" $ scrapeElementLines sel site
+
+-- | Scrape the tags and convert to string
+scrapeElementLines :: Element -> SiteContent -> [String]
+scrapeElementLines sel site = map fromTagText $ scrapeElement sel site
 
 -- | Return all text within an element and optional attribute
 scrapeElement :: Element -> SiteContent -> [Tag String]
