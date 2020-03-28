@@ -8,19 +8,17 @@ module Poll where
 
 import Control.Monad (mapM_, when)
 import Control.Monad.Reader (asks, liftIO)
-import Data.Algorithm.Diff
-import Data.Algorithm.DiffOutput
 import Data.ByteString.Lazy.Char8 (unpack)
-import Data.Hashable as DH
+import Data.Hashable (hash)
 import Data.List (intercalate)
+import Data.List.Split (splitOn)
 import Network.HTTP.Client (httpLbs, parseRequest, responseBody)
-import Data.List.Split
 
 import qualified DBAdapter as DB
+import qualified Models.Notification as NM
+import qualified Models.Target as TM
+import qualified Models.Website as WM
 import Config
-import Models.Notification (newNotification)
-import Models.Target as TM
-import Models.Website as WM
 import Notification
 import Scraper
 
@@ -33,59 +31,68 @@ pollTargets = do
       _  <- DB.exec DB.removeUnusedWebsites
       ws <- DB.exec DB.getWebsites
       mapM_ (\w -> do
-            (b, s) <- pollWebsite w
-            when b $ do -- Website changed, continue checking targets
-                  ts <- DB.exec $ DB.getTargetsOnWebsite $ idWebsite w
-                  mapM_ (\t -> pollTarget t w s) ts) ws
+            (changed, site) <- pollWebsite w
+            -- Website changed? Continue checking targets
+            when changed $ do 
+                  ts <- DB.exec $ DB.getTargetsOnWebsite $ WM.idWebsite w
+                  mapM_ (\t -> pollTarget t w site) ts) ws
 
 -- | Poll a website, check for changes, update hash, return site content
-pollWebsite :: Website -> AppConfig IO (Bool, SiteContent)
+pollWebsite :: WM.Website -> AppConfig IO (Bool, SiteContent)
 pollWebsite w = do
-      liftIO $ putStrLn $ "Polling " ++ url w
-      site <- getSite $ url w
-      let h = scrapePage site
-      b <- DB.exec $ DB.checkWebsiteHash (idWebsite w) h
-      when b $ do -- Website changed, update hash
-            _ <- DB.exec $ DB.updateWebsiteHash (idWebsite w) h
+      liftIO $ putStrLn $ "Polling " ++ WM.url w
+      site <- getSite $ WM.url w
+      let hsh = hash site
+      changed <- DB.exec $ DB.checkWebsiteHash (WM.idWebsite w) hsh
+      -- Website changed? update hash
+      when changed $ do
+            _ <- DB.exec $ DB.updateWebsiteHash (WM.idWebsite w) hsh
             return ()
-      return (b, site)
+      return (changed, site)
 
 -- | Poll a target
-pollTarget :: Target -> Website -> SiteContent -> AppConfig IO ()
-pollTarget t w s = case selector t of
+pollTarget :: TM.Target -> WM.Website -> SiteContent -> AppConfig IO ()
+pollTarget t w s = case TM.selector t of
       -- Full website as target, has already been checked, notify user
-      Nothing -> notify (userID t) w $ "Website " ++ url w ++ " has changed!"
+      Nothing -> notify (TM.userID t) w $ "Website " ++ WM.url w ++ " has changed!"
       -- Specified target, check if that has changed
       (Just e) -> do 
-            liftIO $ putStrLn $ "Polling " ++ url w ++ " with target " ++ e
-            let lins = scrapeElementLines e s
-                text = intercalate "\n" lins
-                hsh  = DH.hash text
+            liftIO $ putStrLn $ "Polling " ++ WM.url w ++ " with target " ++ e
+            let text = intercalate "\n" $ scrapeElementText e s
+                hsh  = hash text
             changed <- DB.exec $ DB.checkTargetHash (TM.id t) hsh
              -- Target changed? update hash, notify user
             when changed $ do
                   _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
-                  let cl = splitOn "\n" $ content t
-                      d  = diffTarget cl lins
+                  let old = splitOn "\n" $ TM.content t
+                      new = splitOn "\n" text
+                      dif = intercalate "\n" $ diffTarget old new
                   _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
-                  notify (userID t) w d -- "Target " ++ e ++ " on website " ++ url w ++ " has changed!"
+                  notify (TM.userID t) w dif
 
 -- | Get the difference as a pretty printed string
-diffTarget :: [String] -> [String] -> String
-diffTarget a b = ppDiff $ getGroupedDiff a b
+diffTarget :: [String] -> [String] -> [String]
+diffTarget []     []     = []
+diffTarget as     []     = map (++ " has been removed") as
+diffTarget []     bs     = map (++ " has been added")   bs
+diffTarget (a:as) (b:bs) | a == b      =                              diffTarget as     bs    -- No change
+                         | a `elem` bs = (b ++ " has been added")   : diffTarget (a:as) bs    -- b added
+                         | b `elem` as = (a ++ " has been removed") : diffTarget as    (b:bs) -- a removed
+                         | otherwise   = (a ++ " -> " ++ b)         : diffTarget as     bs    -- a changed to b
 
 -- | Return site as string
 getSite :: URL -> AppConfig IO String
-getSite u = do man <- asks manager
-               req <- liftIO $ parseRequest u
-               response <- liftIO $ httpLbs req man
-               return . unpack $ responseBody response
+getSite u = do
+      man <- asks manager
+      req <- liftIO $ parseRequest u
+      response <- liftIO $ httpLbs req man
+      return . unpack $ responseBody response
 
 -- | Create a notification
-notify :: Int -> Website -> String -> AppConfig IO ()
+notify :: Int -> WM.Website -> String -> AppConfig IO ()
 notify user site msg = do
-      n <- createNotificationDetails user $ newNotification (url site) msg (url site)
-      DB.exec $ DB.addNotification user (idWebsite site) msg
+      n <- createNotificationDetails user $ NM.newNotification (WM.url site) msg (WM.url site)
+      DB.exec $ DB.addNotification user (WM.idWebsite site) msg
       _ <- sendNotifications n
       return ()
 

@@ -1,6 +1,5 @@
 module ScraperTest where
 
-import Data.Hashable
 import Test.Hspec (SpecWith, describe, it)
 
 import Scraper
@@ -10,10 +9,7 @@ testHTML = "<html><div><div><div id=\"test\"><h1>Text</h1></div></div><!-- This 
 
 scraperTests :: SpecWith ()
 scraperTests = do
-    describe "scrapePage" $
-        it "test" $
-            scrapePage testHTML == hash testHTML
-    describe "scrapeElementHash" $ do
+    describe "scrapeElementText" $ do
         it "html" $
             test "html" "Text\nhtml\nCopyright"
         it "div" $
@@ -30,4 +26,4 @@ scraperTests = do
             test "div[nid=test]" ""
 
 test :: String -> String -> Bool
-test s r = scrapeElementHash s testHTML == hash r
+test s r = scrapeElementText s testHTML == r
