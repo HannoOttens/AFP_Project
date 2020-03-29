@@ -146,7 +146,7 @@
 
         /** Replace all '\n' with '<br/>' to make them show in HTML */
         function formatLineBreaks(str) {
-            return str.replace('\n', '<br/>');
+            return str.replace(/\n/g, '<br/>');
         }
 
         /** Remove all old notifications */
