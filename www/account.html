@@ -139,9 +139,14 @@
         function bindNotificationList() {
             return getList('notification/list', '#Notifications', 'id', [
                 { name: "Website", field: "website" },
-                { name: "Message", field: "message" },
+                { name: "Message", field: "message", templater: formatLineBreaks },
                 { name: "Date", field: "timestamp", templater: toDate },
             ]);
+        }
+
+        /** Replace all '\n' with '<br/>' to make them show in HTML */
+        function formatLineBreaks(str) {
+            return str.replace('\n', '<br/>');
         }
 
         /** Remove all old notifications */
