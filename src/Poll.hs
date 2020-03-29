@@ -66,6 +66,7 @@ pollTarget t w s = case TM.selector t of
                   _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
                   _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
                   let d = diff "\n" (TM.content t) text
+                  trace d d
                   notify (TM.userID t) w d
 
 -- | Get the difference as a pretty printed string
