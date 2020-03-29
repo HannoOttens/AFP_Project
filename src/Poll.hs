@@ -65,22 +65,35 @@ pollTarget t w s = case TM.selector t of
             when changed $ do
                   _ <- DB.exec $ DB.updateTargetHash (TM.id t) hsh
                   _ <- DB.exec $ DB.updateTargetContent (TM.id t) text
-                  let d = diff "\n" (diff "." (\a b -> a ++ " -> " ++ b)) (TM.content t) text
+                  let d = diff "\n" (TM.content t) text
                   notify (TM.userID t) w d
 
 -- | Get the difference as a pretty printed string
-diff :: String -> (String -> String -> String) -> String -> String -> String
-diff s f a b = intercalate "\n" $ diffTarget f (splitOn s a) (splitOn s b)
+diff :: String -> String -> String -> String
+diff s a b = diffTargetGrouped (splitOn s a) (splitOn s b)
 
--- | Check for differences between two lists
-diffTarget :: (String -> String -> String) -> [String] -> [String] -> [String]
-diffTarget _ []     []     = []
-diffTarget _ as     []     = map (++ " has been removed") as
-diffTarget _ []     bs     = map (++ " has been added")   bs
-diffTarget f (a:as) (b:bs) | a == b      =                              diffTarget f as     bs     -- No change
-                           | a `elem` bs = (b ++ " has been added")   : diffTarget f (a:as) bs     -- b added
-                           | b `elem` as = (a ++ " has been removed") : diffTarget f as     (b:bs) -- a removed
-                           | otherwise   = f a b                      : diffTarget f as     bs     -- a changed to b
+-- Make a pretty printed version of the diff
+diffTargetGrouped :: [String] -> [String] -> String
+diffTargetGrouped as bs = let (n, r, c) = diffTargetGrouped' as bs ([],[],[])
+                              nstr = if n /= [] then "Added:\n" ++ intercalate "\n" n else ""
+                              rstr = if r /= [] then "Removed:\n" ++ intercalate "\n" r else ""
+                              cstr = if c /= [] then "Changed:\n" ++ (intercalate "\n" $ map (\(a, b) -> a ++ " -> " ++ b ++ "\n") c) else ""
+                          in nstr ++ "\n" ++ rstr ++ "\n" ++ cstr
+
+-- Find three types of changes: Added, removed and changed
+diffTargetGrouped' :: [String] -> [String] -> ([String], [String], [(String,String)]) 
+                                           -> ([String], [String], [(String,String)])
+diffTargetGrouped' []     []     (n,r,c) = reverseTriple (n, r, c) 
+diffTargetGrouped' as     []     (n,r,c) = reverseTriple (n, r ++ as, c) 
+diffTargetGrouped' []     bs     (n,r,c) = reverseTriple (n ++ bs, r, c)
+diffTargetGrouped' (a:as) (b:bs) (n,r,c) | a == b       = diffTargetGrouped' as     bs     (n,r,c)     -- No change
+                                         | a `elem` bs  = diffTargetGrouped' (a:as) bs     (b:n, r, c) -- b added
+                                         | b `elem` as  = diffTargetGrouped' as     (b:bs) (n, a:r, c) -- a removed
+                                         | otherwise    = diffTargetGrouped' as     bs     (n, r, (a,b):c) -- a changed to b
+
+reverseTriple :: ([a], [b], [c]) -> ([a], [b], [c])
+reverseTriple (a, b, c) = (reverse a, reverse b, reverse c)
+
 
 -- | Return site as string
 getSite :: URL -> AppConfig IO String
