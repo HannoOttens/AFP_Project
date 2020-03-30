@@ -30,8 +30,9 @@ data Config = Config {
       jwtSettings      :: JWTSettings,    -- ^ Settings for JWT
       authConf         :: Context '[CookieSettings, JWTSettings], -- ^ Combined settings for JWT and cookies
       vapidKeys        :: VAPIDKeys, -- ^ Representing a unique VAPID key pair for push notifications
-      manager          :: Manager, -- ^ Network connection manager, shared manager between request
-      passwordStrength :: Int -- ^ Password strength, determines hashing strength for passwords
+      manager          :: Manager,   -- ^ Network connection manager, shared manager between request
+      passwordStrength :: Int,       -- ^ Password strength, determines hashing strength for passwords
+      webPort          :: Int        -- ^ Port to run to run webapp on
 }
 
 -- | Read/construct config
@@ -49,13 +50,14 @@ config =
       return $ Config {
             dbFile = "db",
             initFile = "tables.sqlite",
-            pollSchedule = "0-59 * * * *",
+            pollSchedule = "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
             authConf = cookieSets :. jwtSets :. EmptyContext,
             cookieSettings = cookieSets,
             jwtSettings = jwtSets,
             vapidKeys = vapidKeyPair,
             manager = connManager,
-            passwordStrength = 20
+            passwordStrength = 20,
+            webPort = 8080
       }
 
 -- | Read the notification keys from the configuration

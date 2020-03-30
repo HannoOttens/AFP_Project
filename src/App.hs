@@ -63,7 +63,7 @@ authApi = Proxy
 
 -- | Run server on port 8080
 runApp :: Config -> IO ()
-runApp conf = run 8080 $ app conf
+runApp conf = run (webPort conf) $ app conf
 
 -- | Create application instance
 app :: Config -> Application
