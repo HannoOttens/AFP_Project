@@ -57,6 +57,16 @@ notificationTests = describe "notification endpoint" $ do
                 postForm "/register" registerForm `shouldRespondWith` 301
                 getWithSession loginForm "/notification/clientdelete"
                     `shouldRespondWith` 404
+        describe "/list" $ do
+            it "responds with empty list when requesting notifications for 'new' user" $ do
+                postForm "/register" registerForm `shouldRespondWith` 301
+                getWithSession loginForm "/notification/list"
+                    `shouldRespondWithJson` (200, [] :: [Notification])
+        describe "/clearhistory" $ do
+            it "responds with true when deleting history" $ do
+                postForm "/register" registerForm `shouldRespondWith` 301
+                getWithSession loginForm "/notification/clearhistory"
+                    `shouldRespondWithJson` (200, True)
 
 
 registerForm :: RegisterForm

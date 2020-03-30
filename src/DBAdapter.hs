@@ -217,7 +217,7 @@ getNotificationHistory userID conn = query conn lookupTokens (Only userID)
 deleteNotificationHistory :: UserID -> (Connection -> IO Bool)
 deleteNotificationHistory userId conn = do 
       execute conn delHistory (Only userId)
-      isSuccessful conn
+      return True -- No crash means success
   where delHistory = "DELETE FROM Notifications "
                   <> "WHERE UserID = ?" 
 
