@@ -87,9 +87,6 @@ isChanged (Changed _ _) = True
 isChanged _             = False
 
 fromDiff :: Diff -> String
-fromDiff (Added a)     = quoted a
-fromDiff (Removed r)   = quoted r
-fromDiff (Changed o n) = quoted o ++ " -> " ++ quoted n
-
-quoted :: String -> String
-quoted s = "\"" ++ s ++ "\""
+fromDiff (Added a)     = a
+fromDiff (Removed r)   = r
+fromDiff (Changed o n) = o ++ " -> " ++ n
