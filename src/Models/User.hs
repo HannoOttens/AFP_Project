@@ -12,6 +12,7 @@ import Database.SQLite.Simple
 import GHC.Generics (Generic)
 import Servant.Auth.Server
 
+-- | Type for user session
 newtype Session = Session { userID :: Int } 
     deriving(Generic)
 

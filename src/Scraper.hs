@@ -20,7 +20,7 @@ type SiteContent = String
 -- | Data type for the difference in content
 data Diff = Added String | Removed String | Changed String String
 
--- Trim the string
+-- | Trim the string
 trim :: String -> String
 trim = f . f
    where f = reverse . dropWhile isSpace
@@ -50,7 +50,7 @@ firstResult (x:xs) (Right s) = case select s x of
 diff :: String -> String -> String -> String
 diff s a b = diffTarget (splitOn s a) (splitOn s b)
 
--- Make a pretty printed version of the diff
+-- | Make a pretty printed version of the diff
 diffTarget :: [String] -> [String] -> String
 diffTarget as bs = intercalate "\n" $ filter (not . null) [a, r, c]
     where
@@ -59,7 +59,7 @@ diffTarget as bs = intercalate "\n" $ filter (not . null) [a, r, c]
         r = printDiff "Removed:" isRemoved d
         c = printDiff "Changed:" isChanged d
 
--- Find three types of changes: Added, removed and changed
+-- | Find three types of changes: Added, removed and changed
 diffTargetGrouped :: [String] -> [String] -> [Diff]
 diffTargetGrouped []     []     = []
 diffTargetGrouped os     []     = map Removed os
@@ -69,13 +69,13 @@ diffTargetGrouped (o:os) (n:ns) | o == n      =               diffTargetGrouped 
                                 | n `elem` os = Removed o   : diffTargetGrouped os (n:ns) -- o removed
                                 | otherwise   = Changed o n : diffTargetGrouped os     ns -- o changed to n
 
--- Pretty print the difference given a certain type
+-- | Pretty print the difference given a certain type
 printDiff :: String -> (Diff -> Bool) -> [Diff] -> String
 printDiff s f ds = case map fromDiff $ filter f ds of
     [] -> ""
     xs -> intercalate "\n" (s:xs)
 
--- Helper functions for diffs
+-- | Helper functions for finding diffs
 isAdded, isRemoved, isChanged :: Diff -> Bool
 isAdded (Added _) = True
 isAdded _         = False
@@ -86,6 +86,7 @@ isRemoved _           = False
 isChanged (Changed _ _) = True
 isChanged _             = False
 
+-- | Helper function to retrieve change from diff
 fromDiff :: Diff -> String
 fromDiff (Added a)     = a
 fromDiff (Removed r)   = r
